@@ -1,0 +1,2658 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EduCRM — O'quv Markazi</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f0f6ff;
+    --surface: #ffffff;
+    --surface2: #f7faff;
+    --border: #dde8f8;
+    --blue-50: #eff6ff;
+    --blue-100: #dbeafe;
+    --blue-200: #bfdbfe;
+    --blue-300: #93c5fd;
+    --blue-400: #60a5fa;
+    --blue-500: #3b82f6;
+    --blue-600: #2563eb;
+    --blue-700: #1d4ed8;
+    --blue-800: #1e40af;
+    --blue-900: #1e3a8a;
+    --text: #1e293b;
+    --text-2: #475569;
+    --text-3: #94a3b8;
+    --success: #10b981;
+    --warning: #f59e0b;
+    --danger: #ef4444;
+    --danger-light: #fef2f2;
+    --success-light: #ecfdf5;
+    --warning-light: #fffbeb;
+    --radius: 12px;
+    --radius-sm: 8px;
+    --shadow: 0 1px 3px rgba(30,64,175,.08), 0 4px 16px rgba(30,64,175,.06);
+    --shadow-lg: 0 8px 32px rgba(30,64,175,.12);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Outfit', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    font-size: 14px;
+  }
+
+  /* ── AUTH ── */
+  #auth-screen {
+    display: flex; align-items: center; justify-content: center;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 50%, #e0f2fe 100%);
+  }
+  .auth-card {
+    background: var(--surface);
+    border-radius: 20px;
+    padding: 48px 40px;
+    width: 420px;
+    box-shadow: var(--shadow-lg);
+    border: 1px solid var(--border);
+  }
+  .auth-logo {
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 32px;
+  }
+  .auth-logo-icon {
+    width: 48px; height: 48px;
+    background: linear-gradient(135deg, var(--blue-500), var(--blue-700));
+    border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-size: 22px;
+  }
+  .auth-logo-text h1 { font-size: 22px; font-weight: 700; color: var(--text); }
+  .auth-logo-text p { font-size: 12px; color: var(--text-3); }
+  .auth-title { font-size: 20px; font-weight: 600; margin-bottom: 6px; }
+  .auth-sub { color: var(--text-3); font-size: 13px; margin-bottom: 28px; }
+
+  /* ── LAYOUT ── */
+  #app { display: none; height: 100vh; overflow: hidden; }
+  .layout { display: flex; height: 100vh; }
+
+  /* ── SIDEBAR ── */
+  .sidebar {
+    width: 248px; flex-shrink: 0;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex; flex-direction: column;
+    overflow: hidden;
+  }
+  .sidebar-header {
+    padding: 20px 20px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .sidebar-logo {
+    width: 36px; height: 36px;
+    background: linear-gradient(135deg, var(--blue-500), var(--blue-700));
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-size: 16px; flex-shrink: 0;
+  }
+  .sidebar-title { font-size: 15px; font-weight: 700; }
+  .sidebar-sub { font-size: 11px; color: var(--text-3); }
+  .sidebar-nav { flex: 1; overflow-y: auto; padding: 12px 12px; }
+  .nav-section { margin-bottom: 4px; }
+  .nav-label {
+    font-size: 10px; font-weight: 600; color: var(--text-3);
+    text-transform: uppercase; letter-spacing: .08em;
+    padding: 8px 8px 4px;
+  }
+  .nav-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 10px; border-radius: 8px;
+    cursor: pointer; color: var(--text-2);
+    font-size: 13.5px; font-weight: 500;
+    transition: all .15s;
+    margin-bottom: 1px;
+  }
+  .nav-item:hover { background: var(--blue-50); color: var(--blue-600); }
+  .nav-item.active { background: var(--blue-100); color: var(--blue-700); font-weight: 600; }
+  .nav-item .icon { font-size: 16px; width: 20px; text-align: center; flex-shrink: 0; }
+  .nav-badge {
+    margin-left: auto;
+    background: var(--blue-100);
+    color: var(--blue-600);
+    font-size: 10px; font-weight: 600;
+    padding: 2px 6px; border-radius: 10px;
+  }
+  .sidebar-footer {
+    padding: 12px; border-top: 1px solid var(--border);
+  }
+  .user-card {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px; border-radius: 10px;
+    background: var(--surface2);
+    cursor: pointer;
+  }
+  .user-avatar {
+    width: 34px; height: 34px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--blue-400), var(--blue-600));
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-size: 13px; font-weight: 700;
+    flex-shrink: 0;
+  }
+  .user-name { font-size: 13px; font-weight: 600; }
+  .user-role { font-size: 11px; color: var(--text-3); }
+  .logout-btn {
+    margin-left: auto; background: none; border: none;
+    cursor: pointer; color: var(--text-3); font-size: 16px;
+    padding: 4px; border-radius: 6px;
+    transition: all .15s;
+  }
+  .logout-btn:hover { color: var(--danger); background: var(--danger-light); }
+
+  /* ── MAIN ── */
+  .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+  .topbar {
+    padding: 0 24px;
+    height: 58px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+    flex-shrink: 0;
+  }
+  .page-title { font-size: 18px; font-weight: 700; }
+  .page-sub { font-size: 12px; color: var(--text-3); margin-top: 1px; }
+  .topbar-actions { display: flex; align-items: center; gap: 10px; }
+  .content { flex: 1; overflow-y: auto; padding: 24px; }
+
+  /* ── STATS ── */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 16px; margin-bottom: 24px;
+  }
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+    box-shadow: var(--shadow);
+  }
+  .stat-label { font-size: 12px; color: var(--text-3); font-weight: 500; margin-bottom: 8px; }
+  .stat-value { font-size: 28px; font-weight: 700; color: var(--text); }
+  .stat-icon {
+    float: right; margin-top: -4px;
+    width: 38px; height: 38px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+  }
+
+  /* ── FORM ELEMENTS ── */
+  .form-group { margin-bottom: 16px; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  label { display: block; font-size: 12px; font-weight: 600; color: var(--text-2); margin-bottom: 6px; }
+  input, select, textarea {
+    width: 100%; padding: 9px 12px;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-family: inherit; font-size: 13.5px;
+    color: var(--text); background: var(--surface);
+    outline: none; transition: border-color .15s;
+  }
+  input:focus, select:focus, textarea:focus {
+    border-color: var(--blue-400);
+    box-shadow: 0 0 0 3px rgba(59,130,246,.08);
+  }
+  textarea { resize: vertical; min-height: 80px; }
+
+  /* ── BUTTONS ── */
+  .btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 9px 16px; border-radius: var(--radius-sm);
+    border: none; font-family: inherit; font-size: 13px;
+    font-weight: 600; cursor: pointer; transition: all .15s;
+    text-decoration: none;
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--blue-500), var(--blue-600));
+    color: white;
+  }
+  .btn-primary:hover { background: linear-gradient(135deg, var(--blue-600), var(--blue-700)); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(37,99,235,.3); }
+  .btn-secondary {
+    background: var(--surface); border: 1.5px solid var(--border);
+    color: var(--text-2);
+  }
+  .btn-secondary:hover { border-color: var(--blue-300); color: var(--blue-600); }
+  .btn-danger { background: var(--danger); color: white; }
+  .btn-danger:hover { background: #dc2626; }
+  .btn-sm { padding: 5px 10px; font-size: 12px; }
+  .btn-icon { padding: 8px; }
+  .btn:disabled { opacity: .5; cursor: not-allowed; transform: none !important; }
+
+  /* ── TABLE ── */
+  .table-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+  .table-header {
+    padding: 16px 20px;
+    display: flex; align-items: center; justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+    gap: 12px;
+  }
+  .table-title { font-size: 15px; font-weight: 700; }
+  .search-box {
+    position: relative; flex: 1; max-width: 280px;
+  }
+  .search-box input {
+    padding-left: 32px;
+    background: var(--surface2);
+  }
+  .search-box::before {
+    content: '🔍'; position: absolute;
+    left: 10px; top: 50%; transform: translateY(-50%);
+    font-size: 12px; pointer-events: none;
+  }
+  table { width: 100%; border-collapse: collapse; }
+  th {
+    text-align: left; padding: 10px 16px;
+    font-size: 11px; font-weight: 700;
+    color: var(--text-3); text-transform: uppercase;
+    letter-spacing: .05em;
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+  }
+  td {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    font-size: 13.5px; color: var(--text);
+    vertical-align: middle;
+  }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--blue-50); }
+  .td-actions { display: flex; gap: 6px; }
+
+  /* ── BADGE ── */
+  .badge {
+    display: inline-flex; align-items: center;
+    padding: 3px 10px; border-radius: 20px;
+    font-size: 11px; font-weight: 600;
+  }
+  .badge-blue { background: var(--blue-100); color: var(--blue-700); }
+  .badge-green { background: var(--success-light); color: var(--success); }
+  .badge-yellow { background: var(--warning-light); color: #b45309; }
+  .badge-red { background: var(--danger-light); color: var(--danger); }
+  .badge-gray { background: #f1f5f9; color: #64748b; }
+
+  /* ── MODAL ── */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(15,23,42,.45);
+    z-index: 1000; align-items: center; justify-content: center;
+    backdrop-filter: blur(4px);
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--surface);
+    border-radius: 16px;
+    width: 480px; max-width: 95vw;
+    max-height: 90vh; overflow-y: auto;
+    box-shadow: 0 25px 60px rgba(0,0,0,.2);
+    animation: slideUp .2s ease;
+  }
+  .modal-lg { width: 600px; }
+  .modal-header {
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .modal-title { font-size: 16px; font-weight: 700; }
+  .modal-close {
+    width: 30px; height: 30px; border-radius: 8px;
+    background: var(--surface2); border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; color: var(--text-3);
+    transition: all .15s;
+  }
+  .modal-close:hover { background: var(--danger-light); color: var(--danger); }
+  .modal-body { padding: 20px 24px; }
+  .modal-footer {
+    padding: 16px 24px;
+    border-top: 1px solid var(--border);
+    display: flex; justify-content: flex-end; gap: 10px;
+  }
+  @keyframes slideUp {
+    from { transform: translateY(16px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+
+  /* ── TOAST ── */
+  #toast-container {
+    position: fixed; top: 20px; right: 20px;
+    z-index: 9999; display: flex; flex-direction: column; gap: 8px;
+  }
+  .toast {
+    display: flex; align-items: center; gap: 10px;
+    padding: 12px 16px; border-radius: 10px;
+    background: var(--surface);
+    box-shadow: 0 8px 24px rgba(0,0,0,.12);
+    border: 1px solid var(--border);
+    font-size: 13px; font-weight: 500;
+    animation: slideIn .2s ease;
+    max-width: 320px;
+  }
+  .toast-success { border-left: 3px solid var(--success); }
+  .toast-error { border-left: 3px solid var(--danger); }
+  .toast-info { border-left: 3px solid var(--blue-500); }
+  @keyframes slideIn {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+
+  /* ── EMPTY STATE ── */
+  .empty {
+    text-align: center; padding: 48px 24px;
+    color: var(--text-3);
+  }
+  .empty-icon { font-size: 40px; margin-bottom: 12px; }
+  .empty p { font-size: 14px; }
+
+  /* ── LOADING ── */
+  .loading { text-align: center; padding: 48px; color: var(--text-3); }
+  .spinner {
+    width: 32px; height: 32px; border-radius: 50%;
+    border: 3px solid var(--border);
+    border-top-color: var(--blue-500);
+    animation: spin .8s linear infinite;
+    margin: 0 auto 12px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── MISC ── */
+  .section-gap { margin-bottom: 24px; }
+  .flex { display: flex; }
+  .flex-between { display: flex; align-items: center; justify-content: space-between; }
+  .gap-2 { gap: 8px; }
+  .mt-3 { margin-top: 12px; }
+  .text-sm { font-size: 12px; }
+  .text-muted { color: var(--text-3); }
+  .font-mono { font-family: 'JetBrains Mono', monospace; }
+  .hidden { display: none !important; }
+
+  /* Role-based visibility */
+  .admin-only, .manager-only, .operator-only { display: none; }
+  body[data-role="ADMIN"] .admin-only { display: initial; }
+  body[data-role="ADMIN"] .manager-only { display: initial; }
+  body[data-role="ADMIN"] .admin-op { display: initial; }
+  body[data-role="MANAGER"] .manager-only { display: initial; }
+  body[data-role="OPERATOR"] .operator-only { display: initial; }
+  body[data-role="ADMIN"] .operator-only { display: initial; }
+  .admin-op { display: none; }
+  body[data-role="OPERATOR"] .admin-op { display: initial; }
+  .all-roles { display: initial; }
+
+  .role-badge {
+    display: inline-block;
+    padding: 2px 8px; border-radius: 20px;
+    font-size: 10px; font-weight: 700; text-transform: uppercase;
+  }
+  .role-ADMIN { background: #fdf4ff; color: #a21caf; }
+  .role-MANAGER { background: #eff6ff; color: #1d4ed8; }
+  .role-OPERATOR { background: #f0fdf4; color: #15803d; }
+
+  .page { display: none; }
+  .page.active { display: block; }
+
+  .info-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 12px; margin-bottom: 16px;
+  }
+  .info-item label { font-size: 11px; color: var(--text-3); }
+  .info-item p { font-size: 14px; font-weight: 500; margin-top: 2px; }
+
+  .attendance-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 8px;
+  }
+  .att-student {
+    border: 1.5px solid var(--border);
+    border-radius: 8px; padding: 10px 12px;
+    cursor: pointer; transition: all .15s;
+  }
+  .att-student:hover { border-color: var(--blue-300); }
+  .att-student.keldi { border-color: var(--success); background: var(--success-light); }
+  .att-student.kelmadi { border-color: var(--danger); background: var(--danger-light); }
+  .att-student.kechikdi { border-color: var(--warning); background: var(--warning-light); }
+  .att-name { font-size: 13px; font-weight: 600; }
+  .att-status { font-size: 11px; color: var(--text-3); margin-top: 4px; }
+
+  /* ── ATTENDANCE GROUP CARDS ── */
+  .att-group-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .att-group-card {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    cursor: pointer;
+    transition: all .2s;
+    box-shadow: var(--shadow);
+  }
+  .att-group-card:hover {
+    border-color: var(--blue-400);
+    box-shadow: 0 4px 20px rgba(59,130,246,.15);
+    transform: translateY(-2px);
+  }
+  .att-group-card.selected {
+    border-color: var(--blue-500);
+    background: var(--blue-50);
+    box-shadow: 0 4px 20px rgba(59,130,246,.2);
+  }
+  .att-group-card-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 12px;
+  }
+  .att-group-name { font-size: 15px; font-weight: 700; color: var(--text); }
+  .att-group-meta { font-size: 12px; color: var(--text-3); margin-top: 4px; }
+  .att-group-stats {
+    display: flex; gap: 8px; margin-top: 12px;
+    padding-top: 12px; border-top: 1px solid var(--border);
+  }
+  .att-group-stat {
+    flex: 1; text-align: center;
+    background: var(--surface2); border-radius: 8px; padding: 6px 4px;
+  }
+  .att-group-stat-val { font-size: 16px; font-weight: 700; color: var(--blue-600); }
+  .att-group-stat-lbl { font-size: 10px; color: var(--text-3); margin-top: 2px; }
+
+  .att-back-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 7px 14px; border-radius: 8px;
+    border: 1.5px solid var(--border); background: var(--surface);
+    color: var(--text-2); font-size: 13px; font-weight: 600;
+    cursor: pointer; margin-bottom: 16px; transition: all .15s;
+  }
+  .att-back-btn:hover { border-color: var(--blue-300); color: var(--blue-600); }
+
+  .tab-bar { display: flex; gap: 4px; margin-bottom: 20px; }
+  .tab-btn {
+    padding: 8px 16px; border-radius: 8px;
+    border: 1.5px solid var(--border);
+    background: var(--surface); color: var(--text-2);
+    font-family: inherit; font-size: 13px; font-weight: 500;
+    cursor: pointer; transition: all .15s;
+  }
+  .tab-btn.active { background: var(--blue-100); border-color: var(--blue-300); color: var(--blue-700); }
+
+  .summary-card {
+    background: linear-gradient(135deg, var(--blue-600), var(--blue-800));
+    border-radius: 14px; padding: 20px 24px; color: white;
+    margin-bottom: 20px;
+  }
+  .summary-card h3 { font-size: 13px; opacity: .7; margin-bottom: 8px; }
+  .summary-card .amount { font-size: 32px; font-weight: 700; font-family: 'JetBrains Mono', monospace; }
+</style>
+</head>
+<body>
+
+<!-- TOAST -->
+<div id="toast-container"></div>
+
+<!-- AUTH -->
+<div id="auth-screen">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <div class="auth-logo-icon">🎓</div>
+      <div class="auth-logo-text">
+        <h1>EduCRM</h1>
+        <p>O'quv markazi boshqaruvi</p>
+      </div>
+    </div>
+    <h2 class="auth-title">Kirish</h2>
+    <p class="auth-sub">Davom etish uchun tizimga kiring</p>
+    <div class="form-group">
+      <label>Foydalanuvchi nomi</label>
+      <input id="login-username" type="text" placeholder="username" autocomplete="username">
+    </div>
+    <div class="form-group">
+      <label>Parol</label>
+      <input id="login-password" type="password" placeholder="••••••••" autocomplete="current-password">
+    </div>
+    <button class="btn btn-primary" style="width:100%;justify-content:center;padding:12px" onclick="doLogin()">
+      Kirish →
+    </button>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <div class="layout">
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-logo">🎓</div>
+        <div>
+          <div class="sidebar-title">EduCRM</div>
+          <div class="sidebar-sub">Boshqaruv paneli</div>
+        </div>
+      </div>
+      <nav class="sidebar-nav">
+        <div class="nav-section">
+          <div class="nav-label">Asosiy</div>
+          <div class="nav-item active" onclick="showPage('dashboard')">
+            <span class="icon">📊</span> Dashboard
+          </div>
+        </div>
+        <div class="nav-section admin-only">
+          <div class="nav-label">Admin</div>
+          <div class="nav-item admin-only" onclick="showPage('users')">
+            <span class="icon">👥</span> Foydalanuvchilar
+          </div>
+          <br>
+        </div>
+        <div class="nav-section">
+          <div class="nav-label">CRM</div>
+          <div class="nav-item admin-op" onclick="showPage('leads')">
+            <span class="icon">🎯</span> Lidlar
+          </div>
+          <br> <br>
+          <div class="nav-item all-roles" onclick="showPage('students')">
+            <span class="icon">🎒</span> O'quvchilar
+          </div>
+          <br><br>
+          <div class="nav-item all-roles" onclick="showPage('enrollments')">
+            <span class="icon">📋</span> Ro'yxatga olish
+          </div>
+          <br> <br>
+          <div class="nav-item all-roles" onclick="showPage('payments')">
+            <span class="icon">💳</span> To'lovlar
+          </div>
+          <br><br>
+          <div class="nav-item admin-manager" onclick="showPage('expenses')">
+            <span class="icon">💸</span> Harajatlar
+          </div>
+          <br> <br>
+        </div>
+        <div class="nav-section admin-manager">
+          <div class="nav-label">Xodimlar</div>
+          <div class="nav-item admin-manager" onclick="showPage('teachers')">
+            <span class="icon">&#x1F468;&#x200D;&#x1F3EB;</span> O'qituvchilar
+          </div>
+          <br><br>
+          <div class="nav-item admin-manager" onclick="showPage('salaries')">
+            <span class="icon">&#x1F4B0;</span> Oyliklar
+          </div>
+        </div>
+        <div class="nav-section">
+          <div class="nav-label">O'quv jarayoni</div>
+          <div class="nav-item all-roles" onclick="showPage('courses')">
+            <span class="icon">📚</span> Kurslar
+          </div>
+          <br><br>
+          <div class="nav-item all-roles" onclick="showPage('groups')">
+            <span class="icon">🏫</span> Guruhlar
+          </div>
+          <br><br>
+          <div class="nav-item manager-only" onclick="showPage('lessons')">
+            <span class="icon">📅</span> Darslar
+          </div>
+          <br><br>
+          <div class="nav-item att-roles" onclick="showPage('attendance')">
+            <span class="icon">✅</span> Davomat
+          </div>
+        </div>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="user-card">
+          <div class="user-avatar" id="sidebar-avatar">A</div>
+          <div>
+            <div class="user-name" id="sidebar-name">Admin</div>
+            <div class="user-role" id="sidebar-role">ADMIN</div>
+          </div>
+          <button class="logout-btn" onclick="doLogout()" title="Chiqish"><img src="icons/logout.png" alt="Logout" width="25px" height="25px"></button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="main">
+      <div class="topbar">
+        <div>
+          <div class="page-title" id="topbar-title">Dashboard</div>
+          <div class="page-sub" id="topbar-sub">Umumiy ko'rinish</div>
+        </div>
+        <div class="topbar-actions" id="topbar-actions"></div>
+      </div>
+      <div class="content" id="content">
+        <!-- pages rendered here -->
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+  <div class="modal" id="modal" onclick="e=>e.stopPropagation()">
+    <div class="modal-header">
+      <div class="modal-title" id="modal-title">Modal</div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+    <div class="modal-footer" id="modal-footer"></div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// CONFIG
+// ═══════════════════════════════════════════════════════════════
+const BASE = 'http://localhost:8080/api';
+let TOKEN = localStorage.getItem('token') || '';
+let CURRENT_USER = JSON.parse(localStorage.getItem('user') || 'null');
+
+// ═══════════════════════════════════════════════════════════════
+// HTTP HELPER
+// ═══════════════════════════════════════════════════════════════
+async function api(method, path, body=null) {
+  const opts = {
+    method,
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${TOKEN}` }
+  };
+  if (body) opts.body = JSON.stringify(body);
+  try {
+    const res = await fetch(BASE + path, opts);
+    const data = await res.json();
+    return { ok: res.ok, status: res.status, data };
+  } catch(e) {
+    return { ok: false, status: 0, data: { message: "Server bilan bog'lanib bo'lmadi" } };
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════════════════════════════
+function toast(msg, type='info') {
+  const icons = { success: '✅', error: '❌', info: 'ℹ️' };
+  const t = document.createElement('div');
+  t.className = `toast toast-${type}`;
+  t.innerHTML = `<span>${icons[type]}</span><span>${msg}</span>`;
+  document.getElementById('toast-container').prepend(t);
+  setTimeout(() => t.remove(), 3500);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// MODAL
+// ═══════════════════════════════════════════════════════════════
+function openModal(title, bodyHtml, footerHtml='', large=false) {
+  document.getElementById('modal-title').textContent = title;
+  document.getElementById('modal-body').innerHTML = bodyHtml;
+  document.getElementById('modal-footer').innerHTML = footerHtml;
+  document.getElementById('modal').className = 'modal' + (large ? ' modal-lg' : '');
+  document.getElementById('modal-overlay').classList.add('open');
+}
+function closeModal(e) {
+  if (!e || e.target === document.getElementById('modal-overlay')) {
+    document.getElementById('modal-overlay').classList.remove('open');
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// AUTH
+// ═══════════════════════════════════════════════════════════════
+async function doLogin() {
+  const username = document.getElementById('login-username').value.trim();
+  const password = document.getElementById('login-password').value;
+  if (!username || !password) return toast('Username va parolni kiriting', 'error');
+  const r = await api('POST', '/auth/login', { username, password });
+  if (r.ok) {
+    TOKEN = r.data.data.access_token;
+    CURRENT_USER = r.data.data.user;
+    localStorage.setItem('token', TOKEN);
+    localStorage.setItem('user', JSON.stringify(CURRENT_USER));
+    initApp();
+  } else {
+    toast(r.data.message || 'Kirish xatosi', 'error');
+  }
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && document.getElementById('auth-screen').style.display !== 'none') doLogin();
+});
+
+function doLogout() {
+  TOKEN = ''; CURRENT_USER = null;
+  localStorage.removeItem('token');
+  localStorage.removeItem('user');
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('auth-screen').style.display = 'flex';
+  document.body.removeAttribute('data-role');
+}
+
+function initApp() {
+  document.getElementById('auth-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  document.body.setAttribute('data-role', CURRENT_USER.role);
+  document.getElementById('sidebar-name').textContent = CURRENT_USER.full_name;
+  document.getElementById('sidebar-role').textContent = CURRENT_USER.role;
+  document.getElementById('sidebar-avatar').textContent = CURRENT_USER.full_name[0].toUpperCase();
+  // Role-based nav
+  document.querySelectorAll('.admin-only').forEach(el => el.style.display = CURRENT_USER.role === 'ADMIN' ? '' : 'none');
+  document.querySelectorAll('.admin-op').forEach(el => el.style.display = ['ADMIN','OPERATOR'].includes(CURRENT_USER.role) ? '' : 'none');
+  document.querySelectorAll('.admin-manager').forEach(el => el.style.display = ['ADMIN','MANAGER'].includes(CURRENT_USER.role) ? '' : 'none');
+  document.querySelectorAll('.manager-only').forEach(el => el.style.display = ['ADMIN','MANAGER'].includes(CURRENT_USER.role) ? '' : 'none');
+  document.querySelectorAll('.att-roles').forEach(el => el.style.display = ['ADMIN','MANAGER','OPERATOR'].includes(CURRENT_USER.role) ? '' : 'none');
+  showPage('dashboard');
+}
+
+if (TOKEN && CURRENT_USER) initApp();
+
+// ═══════════════════════════════════════════════════════════════
+// PAGE ROUTING
+// ═══════════════════════════════════════════════════════════════
+const PAGE_META = {
+  dashboard:   { title: 'Dashboard', sub: "Umumiy ko'rinish" },
+  users:       { title: 'Foydalanuvchilar', sub: 'Admin boshqaruvi' },
+  leads:       { title: 'Lidlar', sub: 'Potensial mijozlar' },
+  students:    { title: "O'quvchilar", sub: "Barcha o'quvchilar" },
+  enrollments: { title: "Ro'yxatga olish", sub: 'Guruhga biriktirish' },
+  payments:    { title: "To'lovlar", sub: 'Moliyaviy hisoblar' },
+  courses:     { title: 'Kurslar', sub: "Ta'lim dasturlari" },
+  groups:      { title: 'Guruhlar', sub: "O'quv guruhlari" },
+  lessons:     { title: 'Darslar', sub: 'Dars jadvali' },
+  attendance:  { title: 'Davomat', sub: 'Qatnashish hisoboti' },
+  expenses:    { title: 'Harajatlar', sub: 'Chiqimlar va moliyaviy hisobot' },
+  teachers:    { title: "O'qituvchilar", sub: "O'qituvchilar boshqaruvi" },
+  salaries:    { title: 'Oyliklar', sub: "Guruh bo'yicha oylik hisob-kitob" },
+};
+
+async function showPage(name) {
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => {
+    if (n.getAttribute('onclick')?.includes(`'${name}'`)) n.classList.add('active');
+  });
+  const meta = PAGE_META[name] || {};
+  document.getElementById('topbar-title').textContent = meta.title || name;
+  document.getElementById('topbar-sub').textContent = meta.sub || '';
+  document.getElementById('content').innerHTML = '<div class="loading"><div class="spinner"></div><p>Yuklanmoqda...</p></div>';
+  document.getElementById('topbar-actions').innerHTML = '';
+  await PAGES[name]?.();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════════════════════════
+function fmt(obj) { return JSON.stringify(obj, null, 2); }
+function dateStr(d) { return d ? new Date(d).toLocaleDateString('uz-UZ') : '—'; }
+function timeAgo(d) {
+  if (!d) return '—';
+  const diff = Date.now() - new Date(d);
+  const m = Math.floor(diff/60000);
+  if (m < 1) return 'Hozir';
+  if (m < 60) return `${m} daqiqa avval`;
+  const h = Math.floor(m/60);
+  if (h < 24) return `${h} soat avval`;
+  return dateStr(d);
+}
+function leadBadge(s) {
+  const m = { new:'badge-blue', contacted:'badge-yellow', interested:'badge-green', rejected:'badge-red', converted:'badge-green' };
+  const l = { new:'Yangi', contacted:"Bog'landi", interested:'Qiziqdi', rejected:'Rad', converted:'Aylandi' };
+  return `<span class="badge ${m[s]||'badge-gray'}">${l[s]||s}</span>`;
+}
+function enrBadge(s) {
+  const m = { active:'badge-green', finished:'badge-blue', dropped:'badge-red' };
+  const l = { active:'Faol', finished:'Tugatdi', dropped:'Tark etdi' };
+  return `<span class="badge ${m[s]||'badge-gray'}">${l[s]||s}</span>`;
+}
+function attBadge(s) {
+  const m = { keldi:'badge-green', kelmadi:'badge-red', kechikdi:'badge-yellow' };
+  return s ? `<span class="badge ${m[s]||'badge-gray'}">${s}</span>` : '—';
+}
+function payBadge(t) {
+  const m = { cash:'badge-yellow', click:'badge-blue', payme:'badge-green' };
+  return `<span class="badge ${m[t]||'badge-gray'}">${t}</span>`;
+}
+function roleBadge(r) {
+  return `<span class="role-badge role-${r}">${r}</span>`;
+}
+function money(n) {
+  return Number(n || 0).toLocaleString('uz-UZ') + " so'm";
+}
+
+function searchFilter(items, query, fields) {
+  if (!query) return items;
+  const q = query.toLowerCase();
+  return items.filter(i => fields.some(f => String(i[f]||'').toLowerCase().includes(q)));
+}
+
+function renderTable(headers, rows, emptyMsg="Ma'lumot topilmadi") {
+  if (!rows.length) return `<div class="empty"><div class="empty-icon">📭</div><p>${emptyMsg}</p></div>`;
+  return `<table><thead><tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr></thead><tbody>${rows.join('')}</tbody></table>`;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// PAGES
+// ═══════════════════════════════════════════════════════════════
+const PAGES = {};
+
+// ── DASHBOARD ──
+PAGES.dashboard = async () => {
+  const [uR, lR, sR, cR, gR, pR, exR] = await Promise.all([
+    api('GET', '/admin/users'),
+    api('GET', '/operator/leads'),
+    api('GET', '/operator/students'),
+    api('GET', '/courses'),
+    api('GET', '/groups'),
+    api('GET', '/operator/payments'),
+    api('GET', '/expenses/summary'),
+  ]);
+  const users = uR.ok ? uR.data.data : [];
+  const leads = lR.ok ? lR.data.data : [];
+  const students = sR.ok ? sR.data.data : [];
+  const courses = cR.ok ? cR.data.data : [];
+  const groups = gR.ok ? gR.data.data : [];
+  const payments = pR.ok ? pR.data.data : [];
+  const totalPay = payments.reduce((s, p) => s + parseFloat(p.amount || 0), 0);
+  const summary  = exR.ok ? exR.data.data : {};
+  const totalExp = summary.total_expense || 0;
+
+  // O'qituvchilar oyligi: barcha saqlangan TeacherSalary yig'indisi
+  // Guruhlar bo'yicha salary-report dan olamiz
+  let totalTeacherSalary = 0;
+  if (groups.length) {
+    const salReports = await Promise.all(
+      groups.filter(g => g.teacher_id).map(g =>
+        api('GET', `/groups/${g.id}/salary-report`)
+          .then(r => r.ok ? (r.data.data.records || []).reduce((s,rec) => s + (rec.teacher_salary||0), 0) : 0)
+          .catch(() => 0)
+      )
+    );
+    totalTeacherSalary = salReports.reduce((a,b) => a+b, 0);
+  }
+
+  // Sof foyda = jami to'lov - o'qituvchi oyliklari - harajatlar
+  const netProfit = totalPay - totalTeacherSalary - totalExp;
+  const activeLead = leads.filter(l => l.status === 'new' || l.status === 'contacted').length;
+
+  document.getElementById('content').innerHTML = `
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#eff6ff">👥</div>
+        <div class="stat-label">Foydalanuvchilar</div>
+        <div class="stat-value">${users.length}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#f0fdf4">🎒</div>
+        <div class="stat-label">O'quvchilar</div>
+        <div class="stat-value">${students.length}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#fdf4ff">🎯</div>
+        <div class="stat-label">Faol lidlar</div>
+        <div class="stat-value">${activeLead}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#fffbeb">📚</div>
+        <div class="stat-label">Kurslar</div>
+        <div class="stat-value">${courses.length}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#eff6ff">🏫</div>
+        <div class="stat-label">Guruhlar</div>
+        <div class="stat-value">${groups.length}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#ecfdf5">💰</div>
+        <div class="stat-label">Jami to'lov</div>
+        <div class="stat-value" style="font-size:16px">${money(totalPay)}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#fef2f2">💸</div>
+        <div class="stat-label">Jami harajat</div>
+        <div class="stat-value" style="font-size:16px;color:#dc2626">${money(totalExp)}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#fff7ed">👨‍🏫</div>
+        <div class="stat-label">O'qituvchi oyligi</div>
+        <div class="stat-value" style="font-size:16px;color:#d97706">${money(totalTeacherSalary)}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background:${netProfit>=0?'#ecfdf5':'#fef2f2'}">${netProfit>=0?'📈':'📉'}</div>
+        <div class="stat-label">Sof foyda</div>
+        <div class="stat-value" style="font-size:16px;color:${netProfit>=0?'#059669':'#dc2626'}">${money(Math.abs(netProfit))}${netProfit<0?' <small>(zarar)</small>':''}</div>
+        <div style="font-size:11px;color:var(--text-3);margin-top:4px">
+          ${money(totalPay)} − ${money(totalTeacherSalary)} − ${money(totalExp)}
+        </div>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+      <div class="table-card">
+        <div class="table-header">
+          <div class="table-title">🎯 So'ngi lidlar</div>
+        </div>
+        ${renderTable(['Ism','Telefon','Holat'],
+          leads.slice(0,5).map(l => `<tr>
+            <td>${l.full_name}</td>
+            <td class="font-mono">${l.phone_number||'—'}</td>
+            <td>${leadBadge(l.status)}</td>
+          </tr>`), "Lid yo'q")}
+      </div>
+      <div class="table-card">
+        <div class="table-header">
+          <div class="table-title">💳 So'ngi to'lovlar</div>
+        </div>
+        ${renderTable(["O'quvchi ID",'Miqdor','Tur','Oy'],
+          payments.slice(0,5).map(p => `<tr>
+            <td>#${p.student_id}</td>
+            <td class="font-mono">${money(p.amount)}</td>
+            <td>${payBadge(p.payment_type)}</td>
+            <td>${p.for_month||'—'}</td>
+          </tr>`), "To'lov yo'q")}
+      </div>
+    </div>
+  `;
+};
+
+// ── USERS ──
+PAGES.users = async () => {
+  if (CURRENT_USER.role !== 'ADMIN') {
+    document.getElementById('content').innerHTML = '<div class="empty"><div class="empty-icon">🚫</div><p>Ruxsat yo&#39;q</p></div>';
+    return;
+  }
+  document.getElementById('topbar-actions').innerHTML = `<button class="btn btn-primary" onclick="openUserModal()">＋ Yangi foydalanuvchi</button>`;
+  const r = await api('GET', '/admin/users');
+  if (!r.ok) return toast(r.data.message, 'error');
+  let users = r.data.data;
+
+  const render = (list) => {
+    document.getElementById('content').innerHTML = `
+      <div class="table-card">
+        <div class="table-header">
+          <div class="table-title">Foydalanuvchilar (${list.length})</div>
+          <div class="search-box"><input type="text" placeholder="Qidirish..." id="user-search" oninput="filterUsers(this.value)" value=""></div>
+        </div>
+        ${renderTable(['ID','Ism','Username','Rol','Yaratilgan','Amallar'],
+          list.map(u => `<tr>
+            <td class="font-mono text-muted">#${u.id}</td>
+            <td><b>${u.full_name}</b></td>
+            <td class="font-mono">${u.username}</td>
+            <td>${roleBadge(u.role)}</td>
+            <td class="text-muted">${dateStr(u.created_at)}</td>
+            <td><div class="td-actions">
+              <button class="btn btn-secondary btn-sm" onclick='openUserModal(${JSON.stringify(u)})'>✏️</button>
+              <button class="btn btn-danger btn-sm" onclick="deleteUser(${u.id},'${u.full_name}')">🗑</button>
+            </div></td>
+          </tr>`), "Foydalanuvchi yo'q")}
+      </div>`;
+    window._users = users;
+  };
+  window.filterUsers = (q) => render(searchFilter(users, q, ['full_name','username','role']));
+  render(users);
+};
+
+function openUserModal(u=null) {
+  const editing = !!u;
+  const uid = u ? u.id : null;
+  const title = editing ? 'Foydalanuvchini tahrirlash' : 'Yangi foydalanuvchi';
+  const body = `
+    <div class="form-group">
+      <label>To'liq ism</label>
+      <input id="u-name" value="${u ? u.full_name : ''}">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Username</label>
+        <input id="u-uname" value="${u ? u.username : ''}">
+      </div>
+      <div class="form-group">
+        <label>Parol ${editing ? "(bo'sh qoldiring)" : ''}</label>
+        <input id="u-pass" type="password">
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Rol</label>
+      <select id="u-role">
+        <option value="ADMIN" ${u && u.role==='ADMIN' ? 'selected' : ''}>ADMIN</option>
+        <option value="MANAGER" ${u && u.role==='MANAGER' ? 'selected' : ''}>MANAGER</option>
+        <option value="OPERATOR" ${u && u.role==='OPERATOR' ? 'selected' : ''}>OPERATOR</option>
+      </select>
+    </div>`;
+  const footer = `
+    <button class="btn btn-secondary" onclick="closeModal()">Bekor</button>
+    <button class="btn btn-primary" onclick="saveUser(${uid || 'null'})">${editing ? 'Saqlash' : 'Yaratish'}</button>`;
+  openModal(title, body, footer);
+}
+
+
+async function saveUser(id) {
+  const body = {
+    full_name: document.getElementById('u-name').value.trim(),
+    username: document.getElementById('u-uname').value.trim(),
+    role: document.getElementById('u-role').value,
+  };
+  const pass = document.getElementById('u-pass').value;
+  if (pass) body.password = pass;
+  if (!id) body.password = pass;
+  if (!body.full_name || !body.username) return toast('Ism va username majburiy', 'error');
+  const r = id ? await api('PATCH', `/admin/users/${id}`, body) : await api('POST', '/admin/users', body);
+  if (r.ok) { toast(id ? 'Yangilandi' : 'Yaratildi', 'success'); closeModal(); PAGES.users(); }
+  else toast(r.data.message, 'error');
+}
+
+async function deleteUser(id, name) {
+  if (!confirm(`"${name}" ni o'chirasizmi?`)) return;
+  const r = await api('DELETE', `/admin/users/${id}`);
+  if (r.ok) { toast("O'chirildi", 'success'); PAGES.users(); }
+  else toast(r.data.message, 'error');
+}
+
+// ── LEADS ──
+PAGES.leads = async () => {
+  document.getElementById('topbar-actions').innerHTML = `<button class="btn btn-primary" onclick="openLeadModal()">＋ Yangi lid</button>`;
+  const r = await api('GET', '/operator/leads');
+  if (!r.ok) return toast(r.data.message, 'error');
+  let leads = r.data.data;
+
+  const render = (list) => {
+    document.getElementById('content').innerHTML = `
+      <div class="tab-bar" id="lead-tabs">
+        <button class="tab-btn active" onclick="filterLeadTab('all',this)">Hammasi (${leads.length})</button>
+        <button class="tab-btn" onclick="filterLeadTab('new',this)">Yangi</button>
+        <button class="tab-btn" onclick="filterLeadTab('contacted',this)">Bog'landi</button>
+        <button class="tab-btn" onclick="filterLeadTab('interested',this)">Qiziqdi</button>
+        <button class="tab-btn" onclick="filterLeadTab('rejected',this)">Rad</button>
+        <button class="tab-btn" onclick="filterLeadTab('converted',this)">Aylandi</button>
+      </div>
+      <div class="table-card">
+        <div class="table-header">
+          <div class="table-title">Lidlar (${list.length})</div>
+          <div class="search-box"><input type="text" placeholder="Qidirish..." oninput="window._filterLead(this.value)"></div>
+        </div>
+        ${renderTable(['ID','Ism','Telefon','Manba','Holat','Izoh','Vaqt','Amallar'],
+          list.map(l => `<tr>
+            <td class="font-mono text-muted">#${l.id}</td>
+            <td><b>${l.full_name}</b></td>
+            <td class="font-mono">${l.phone_number||'—'}</td>
+            <td>${l.source||'—'}</td>
+            <td>${leadBadge(l.status)}</td>
+            <td class="text-muted">${l.comment||'—'}</td>
+            <td class="text-muted text-sm">${timeAgo(l.created_at)}</td>
+            <td><div class="td-actions">
+              <button class="btn btn-secondary btn-sm" onclick='openLeadModal(${JSON.stringify(l)})'>✏️</button>
+              <button class="btn btn-danger btn-sm" onclick="deleteLead(${l.id})">🗑</button>
+            </div></td>
+          </tr>`), 'Lid topilmadi')}
+      </div>`;
+  };
+  window._allLeads = leads;
+  window._leadTab = 'all';
+  window._filterLead = (q) => {
+    let filtered = window._leadTab === 'all' ? leads : leads.filter(l => l.status === window._leadTab);
+    render(searchFilter(filtered, q, ['full_name','phone_number','source']));
+  };
+  window.filterLeadTab = (tab, btn) => {
+    document.querySelectorAll('#lead-tabs .tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    window._leadTab = tab;
+    render(tab === 'all' ? leads : leads.filter(l => l.status === tab));
+  };
+  render(leads);
+};
+
+function openLeadModal(l=null) {
+  const lid = l ? l.id : null;
+  const title = l ? 'Lidni tahrirlash' : 'Yangi lid';
+  const statuses = ['new','contacted','interested','rejected','converted'];
+  const body = `
+    <div class="form-row">
+      <div class="form-group"><label>Ism</label><input id="l-name" value="${l ? l.full_name : ''}"></div>
+      <div class="form-group"><label>Telefon</label><input id="l-phone" value="${l ? l.phone_number : ''}"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Manba</label><input id="l-source" value="${l ? (l.source||'') : ''}"></div>
+      <div class="form-group">
+        <label>Holat</label>
+        <select id="l-status">
+          ${statuses.map(s => `<option value="${s}" ${l && l.status===s ? 'selected' : ''}>${s}</option>`).join('')}
+        </select>
+      </div>
+    </div>
+    <div class="form-group"><label>Izoh</label><textarea id="l-comment">${l ? (l.comment||'') : ''}</textarea></div>`;
+  const footer = `
+    <button class="btn btn-secondary" onclick="closeModal()">Bekor</button>
+    <button class="btn btn-primary" onclick="saveLead(${lid || 'null'})">${l ? 'Saqlash' : 'Yaratish'}</button>`;
+  openModal(title, body, footer);
+}
+
+
+async function saveLead(id) {
+  const body = {
+    full_name: document.getElementById('l-name').value.trim(),
+    phone_number: document.getElementById('l-phone').value.trim(),
+    source: document.getElementById('l-source').value.trim(),
+    status: document.getElementById('l-status').value,
+    comment: document.getElementById('l-comment').value.trim(),
+  };
+  if (!body.full_name || !body.phone_number) return toast('Ism va telefon majburiy', 'error');
+  const r = id ? await api('PATCH', `/operator/leads/${id}`, body) : await api('POST', '/operator/leads', body);
+  if (r.ok) { toast(id ? 'Yangilandi' : 'Yaratildi', 'success'); closeModal(); PAGES.leads(); }
+  else toast(r.data.message, 'error');
+}
+
+async function deleteLead(id) {
+  if (!confirm("Lidni o'chirasizmi?")) return;
+  const r = await api('DELETE', `/operator/leads/${id}`);
+  if (r.ok) { toast("O'chirildi", 'success'); PAGES.leads(); }
+  else toast(r.data.message, 'error');
+}
+
+// ── STUDENTS ──
+PAGES.students = async () => {
+  const canEdit = ['ADMIN','OPERATOR'].includes(CURRENT_USER.role);
+  if (canEdit) document.getElementById('topbar-actions').innerHTML = `<button class="btn btn-primary" onclick="openStudentModal()">＋ Yangi o'quvchi</button>`;
+  const r = await api('GET', '/operator/students');
+  if (!r.ok) return toast(r.data.message, 'error');
+  let students = r.data.data;
+
+  const render = (list) => {
+    document.getElementById('content').innerHTML = `
+      <div class="table-card">
+        <div class="table-header">
+          <div class="table-title">O'quvchilar (${list.length})</div>
+          <div class="search-box"><input type="text" placeholder="Qidirish..." oninput="window._filterStudent(this.value)"></div>
+        </div>
+        ${renderTable(['ID','Ism','Telefon','Izoh','Yaratilgan','Amallar'],
+          list.map(s => `<tr>
+            <td class="font-mono text-muted">#${s.id}</td>
+            <td><b>${s.full_name}</b></td>
+            <td class="font-mono">${s.phone_number||'—'}</td>
+            <td class="text-muted">${s.comment||'—'}</td>
+            <td class="text-muted text-sm">${dateStr(s.created_at)}</td>
+            <td><div class="td-actions">
+              <button class="btn btn-secondary btn-sm" onclick="viewStudentDebt(${s.id})">💳 Qarz</button>
+              <button class="btn btn-secondary btn-sm" onclick='openStudentDetail(${s.id})'>👁</button>
+              ${canEdit ? `<button class="btn btn-secondary btn-sm" onclick='openStudentModal(${JSON.stringify(s)})'>✏️</button>` : ''}
+              ${CURRENT_USER.role==='ADMIN' ? `<button class="btn btn-danger btn-sm" onclick="deleteStudent(${s.id})">🗑</button>` : ''}
+            </div></td>
+          </tr>`), "O'quvchi topilmadi")}
+      </div>`;
+  };
+  window._filterStudent = (q) => render(searchFilter(students, q, ['full_name','phone_number']));
+  render(students);
+};
+
+async function openStudentDetail(id) {
+  const r = await api('GET', `/operator/students/${id}`);
+  if (!r.ok) return toast(r.data.message, 'error');
+  const s = r.data.data;
+  const body = `
+    <div class="info-grid">
+      <div class="info-item"><label>ID</label><p class="font-mono">#${s.id}</p></div>
+      <div class="info-item"><label>Telefon</label><p class="font-mono">${s.phone_number||'—'}</p></div>
+      <div class="info-item"><label>Yaratilgan</label><p>${dateStr(s.created_at)}</p></div>
+      <div class="info-item"><label>Izoh</label><p>${s.comment||'—'}</p></div>
+    </div>`;
+  openModal(`O'quvchi: ${s.full_name}`, body, `<button class="btn btn-secondary" onclick="closeModal()">Yopish</button>`);
+}
+
+
+function openStudentModal(s=null) {
+  const sid = s ? s.id : null;
+  const title = s ? "O'quvchini tahrirlash" : "Yangi o'quvchi";
+  const body = `
+    <div class="form-group"><label>To'liq ism</label><input id="s-name" value="${s ? s.full_name : ''}"></div>
+    <div class="form-group"><label>Telefon</label><input id="s-phone" value="${s ? s.phone_number : ''}"></div>
+    <div class="form-group"><label>Izoh</label><textarea id="s-comment">${s ? (s.comment||'') : ''}</textarea></div>`;
+  const footer = `
+    <button class="btn btn-secondary" onclick="closeModal()">Bekor</button>
+    <button class="btn btn-primary" onclick="saveStudent(${sid||'null'})">${s ? 'Saqlash' : 'Yaratish'}</button>`;
+  openModal(title, body, footer);
+}
+
+
+async function saveStudent(id) {
+  const body = {
+    full_name: document.getElementById('s-name').value.trim(),
+    phone_number: document.getElementById('s-phone').value.trim(),
+    comment: document.getElementById('s-comment').value.trim(),
+  };
+  if (!body.full_name) return toast('Ism majburiy', 'error');
+  const r = id ? await api('PATCH', `/operator/students/${id}`, body) : await api('POST', '/operator/students', body);
+  if (r.ok) { toast(id ? 'Yangilandi' : 'Yaratildi', 'success'); closeModal(); PAGES.students(); }
+  else toast(r.data.message, 'error');
+}
+
+async function deleteStudent(id) {
+  if (!confirm("O'quvchini o'chirasizmi?")) return;
+  const r = await api('DELETE', `/operator/students/${id}`);
+  if (r.ok) { toast("O'chirildi", 'success'); PAGES.students(); }
+  else toast(r.data.message, 'error');
+}
+
+// ── ENROLLMENTS ──
+PAGES.enrollments = async () => {
+  const canEdit = ['ADMIN','OPERATOR'].includes(CURRENT_USER.role);
+  if (canEdit) document.getElementById('topbar-actions').innerHTML = `<button class="btn btn-primary" onclick="openEnrollmentModal()">＋ Guruhga qo'shish</button>`;
+  const r = await api('GET', '/operator/enrollments');
+  if (!r.ok) return toast(r.data.message, 'error');
+  const enrollments = r.data.data;
+
+  document.getElementById('content').innerHTML = `
+    <div class="table-card">
+      <div class="table-header">
+        <div class="table-title">Ro'yxatga olinganlar (${enrollments.length})</div>
+      </div>
+      ${renderTable(['ID',"O'quvchi ID",'Guruh ID','Holat','Yaratilgan','Amallar'],
+        enrollments.map(e => `<tr>
+          <td class="font-mono text-muted">#${e.id}</td>
+          <td>#${e.student_id}</td>
+          <td>#${e.group_id}</td>
+          <td>${enrBadge(e.status)}</td>
+          <td class="text-muted">${dateStr(e.created_at)}</td>
+          <td><div class="td-actions">
+            <button class="btn btn-secondary btn-sm" onclick="changeEnrollStatus(${e.id},'${e.status}')">Holat</button>
+            ${CURRENT_USER.role==='ADMIN' ? `<button class="btn btn-danger btn-sm" onclick="deleteEnroll(${e.id})">🗑</button>` : ''}
+          </div></td>
+        </tr>`), "Ro'yxat bo'sh")}
+    </div>`;
+};
+
+async function openEnrollmentModal() {
+  const [sR, gR] = await Promise.all([api('GET','/operator/students'), api('GET','/groups')]);
+  const students = sR.ok ? sR.data.data : [];
+  const groups   = gR.ok ? gR.data.data : [];
+  const stuOpts  = students.map(s => `<option value="${s.id}">${s.full_name} (${s.phone_number||'—'})</option>`).join('');
+  const grpOpts  = groups.map(g => `<option value="${g.id}">${g.name} — ${g.course_name||''} (${g.teacher_name})</option>`).join('');
+  const body = `
+    <div class="form-group">
+      <label>O'quvchi</label>
+      <select id="e-student"><option value="">Tanlang...</option>${stuOpts}</select>
+    </div>
+    <div class="form-group">
+      <label>Guruh</label>
+      <select id="e-group"><option value="">Tanlang...</option>${grpOpts}</select>
+    </div>
+    <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:10px;font-size:13px;color:#1d4ed8;margin-top:4px">
+      O'quvchi guruhga qo'shilganda kurs narxiga ko'ra qarz avtomatik yaratiladi.
+    </div>`;
+  const footer = `
+    <button class="btn btn-secondary" onclick="closeModal()">Bekor</button>
+    <button class="btn btn-primary" onclick="saveEnrollment()">Qo'shish</button>`;
+  openModal("Guruhga o'quvchi qo'shish", body, footer);
+}
+
+
+async function saveEnrollment() {
+  const body = {
+    student_id: parseInt(document.getElementById('e-student').value),
+    group_id: parseInt(document.getElementById('e-group').value),
+  };
+  if (!body.student_id || !body.group_id) return toast("O'quvchi va guruhni tanlang", 'error');
+  const r = await api('POST', '/operator/enrollments', body);
+  if (r.ok) {
+    const debt = r.data.data?.debt_created;
+    const msg = debt ? `Qo'shildi! Qarz: ${money(debt.total_amount)}` : "Qo'shildi!";
+    toast(msg, 'success'); closeModal(); PAGES.enrollments();
+  } else toast(r.data.message, 'error');
+}
+
+async function changeEnrollStatus(id, current) {
+  const statuses = ['active','finished','dropped'];
+  const opts = statuses.map(s => `<option value="${s}" ${s===current ? 'selected' : ''}>${s}</option>`).join('');
+  const body = `<div class="form-group"><label>Yangi holat</label><select id="en-status">${opts}</select></div>`;
+  const footer = `
+    <button class="btn btn-secondary" onclick="closeModal()">Bekor</button>
+    <button class="btn btn-primary" onclick="doChangeEnrollStatus(${id})">Saqlash</button>`;
+  openModal("Holatni o'zgartirish", body, footer);
+}
+
+
+async function doChangeEnrollStatus(id) {
+  const r = await api('PATCH', `/operator/enrollments/${id}`, { status: document.getElementById('en-status').value });
+  if (r.ok) { toast('Yangilandi', 'success'); closeModal(); PAGES.enrollments(); }
+  else toast(r.data.message, 'error');
+}
+
+async function deleteEnroll(id) {
+  if (!confirm("O'chirasizmi?")) return;
+  const r = await api('DELETE', `/operator/enrollments/${id}`);
+  if (r.ok) { toast("O'chirildi", 'success'); PAGES.enrollments(); }
+  else toast(r.data.message, 'error');
+}
+
+// ── PAYMENTS ──
+PAGES.payments = async () => {
+  document.getElementById('topbar-actions').innerHTML = `<button class="btn btn-primary" onclick="openPaymentModal()">＋ To'lov qabul qilish</button>`;
+  const r = await api('GET', '/operator/payments');
+  if (!r.ok) return toast(r.data.message, 'error');
+  const payments = r.data.data;
+  const total = payments.reduce((s, p) => s + parseFloat(p.amount || 0), 0);
+
+  document.getElementById('content').innerHTML = `
+    <div class="summary-card">
+      <h3>Jami to'lov</h3>
+      <div class="amount">${money(total)}</div>
+    </div>
+    <div class="table-card">
+      <div class="table-header">
+        <div class="table-title">To'lovlar (${payments.length})</div>
+        <div class="search-box"><input type="text" placeholder="Qidirish..." oninput="filterPay(this.value)"></div>
+      </div>
+      <div id="pay-table">
+        ${renderPayTable(payments)}
+      </div>
+    </div>`;
+  window._payments = payments;
+  window.filterPay = (q) => document.getElementById('pay-table').innerHTML = renderPayTable(searchFilter(payments, q, ['payment_type','for_month','comment']));
+};
+
+function renderPayTable(list) {
+  return renderTable(['ID',"O'quvchi ID",'Miqdor','Tur','Oy','Izoh','Vaqt','Amallar'],
+    list.map(p => `<tr>
+      <td class="font-mono text-muted">#${p.id}</td>
+      <td>#${p.student_id}</td>
+      <td class="font-mono"><b>${money(p.amount)}</b></td>
+      <td>${payBadge(p.payment_type)}</td>
+      <td>${p.for_month||'—'}</td>
+      <td class="text-muted">${p.comment||'—'}</td>
+      <td class="text-muted text-sm">${timeAgo(p.payment_date)}</td>
+      <td><div class="td-actions">
+        ${['ADMIN','MANAGER'].includes(CURRENT_USER.role) ? `<button class="btn btn-danger btn-sm" onclick="deletePayment(${p.id})">🗑</button>` : ''}
+      </div></td>
+    </tr>`), "To'lov yo'q");
+}
+
+async function openPaymentModal() {
+  const sR = await api('GET', '/operator/students');
+  const students = sR.ok ? sR.data.data : [];
+  const now   = new Date();
+  const month = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+  const stuOpts = students.map(s => `<option value="${s.id}">${s.full_name}</option>`).join('');
+  const body = `
+    <div class="form-group">
+      <label>O'quvchi</label>
+      <select id="p-student" onchange="loadStudentDebtInfo(this.value)">
+        <option value="">Tanlang...</option>${stuOpts}
+      </select>
+    </div>
+    <div id="debt-info" style="margin-bottom:12px"></div>
+    <div class="form-row">
+      <div class="form-group"><label>Miqdor (so'm)</label><input id="p-amount" type="number" placeholder="1200000"></div>
+      <div class="form-group">
+        <label>To'lov turi</label>
+        <select id="p-type">
+          <option value="cash">Cash</option>
+          <option value="click">Click</option>
+          <option value="payme">Payme</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group"><label>Oy</label><input id="p-month" value="${month}" placeholder="2025-01"></div>
+    <div class="form-group"><label>Izoh</label><textarea id="p-comment"></textarea></div>`;
+  const footer = `
+    <button class="btn btn-secondary" onclick="closeModal()">Bekor</button>
+    <button class="btn btn-primary" onclick="savePayment()">Saqlash</button>`;
+  openModal("To'lov qabul qilish", body, footer);
+}
+
+
+async function loadStudentDebtInfo(studentId) {
+  if (!studentId) return;
+  const r = await api('GET', `/operator/debts/student/${studentId}`);
+  if (!r.ok) return;
+  const d = r.data.data;
+  document.getElementById('debt-info').innerHTML = `
+    <div style="background:${d.total_remaining>0?'#fff7ed':'#ecfdf5'};border:1px solid ${d.total_remaining>0?'#fed7aa':'#a7f3d0'};border-radius:8px;padding:10px;font-size:13px">
+      Jami qarz: <b>${money(d.total_debt)}</b> &nbsp;|&nbsp;
+      To'langan: <b style="color:#059669">${money(d.total_paid)}</b> &nbsp;|&nbsp;
+      Qolgan: <b style="color:${d.total_remaining>0?'#d97706':'#059669'}">${money(d.total_remaining)}</b>
+    </div>`;
+}
+async function savePayment() {
+  const body = {
+    student_id: parseInt(document.getElementById('p-student').value),
+    amount: parseFloat(document.getElementById('p-amount').value),
+    payment_type: document.getElementById('p-type').value,
+    for_month: document.getElementById('p-month').value.trim(),
+    comment: document.getElementById('p-comment').value.trim(),
+  };
+  if (!body.student_id || !body.amount || !body.for_month) return toast("Maydonlarni to'ldiring", 'error');
+  const r = await api('POST', '/operator/payments', body);
+  if (r.ok) {
+    const ds = r.data.data?.debt_status;
+    const msg = ds ? `To'lov saqlandi. Qolgan qarz: ${money(ds.remaining_debt)}` : "To'lov saqlandi";
+    toast(msg, 'success'); closeModal(); PAGES.payments();
+  } else toast(r.data.message, 'error');
+}
+
+async function deletePayment(id) {
+  if (!confirm("To'lovni o'chirasizmi?")) return;
+  const r = await api('DELETE', `/operator/payments/${id}`);
+  if (r.ok) { toast("O'chirildi", 'success'); PAGES.payments(); }
+  else toast(r.data.message, 'error');
+}
+
+// ── COURSES ──
+PAGES.courses = async () => {
+  if (CURRENT_USER.role === 'ADMIN') document.getElementById('topbar-actions').innerHTML = `<button class="btn btn-primary" onclick="openCourseModal()">＋ Yangi kurs</button>`;
+  const r = await api('GET', '/courses');
+  if (!r.ok) return toast(r.data.message, 'error');
+  const courses = r.data.data;
+
+  document.getElementById('content').innerHTML = `
+    <div class="table-card">
+      <div class="table-header">
+        <div class="table-title">Kurslar (${courses.length})</div>
+      </div>
+      ${renderTable(['ID','Kurs nomi','Oylik narx','Davomiylik','Boshlanish sanasi','Jami narx','Amallar'],
+        courses.map(c => `<tr>
+          <td class="font-mono text-muted">#${c.id}</td>
+          <td><b>${c.name}</b></td>
+          <td class="font-mono">${money(c.price)}/oy</td>
+          <td><span class="badge badge-blue">${c.duration_months||1} oy</span></td>
+          <td>${c.start_date ? dateStr(c.start_date) : '<span style="color:var(--text-3)">—</span>'}</td>
+          <td class="font-mono"><b style="color:#059669">${money(c.total_price||c.price)}</b></td>
+          <td><div class="td-actions">
+            ${CURRENT_USER.role==='ADMIN' ? `
+              <button class="btn btn-secondary btn-sm" onclick='openCourseModal(${JSON.stringify(c)})'>✏️</button>
+              <button class="btn btn-danger btn-sm" onclick="deleteCourse(${c.id})">🗑</button>
+            ` : ''}
+          </div></td>
+        </tr>`), 'Kurs topilmadi')}
+    </div>`;
+};
+
+function openCourseModal(c=null) {
+  const cid = c ? c.id : null;
+  const title = c ? 'Kursni tahrirlash' : 'Yangi kurs';
+  const body = `
+    <div class="form-group"><label>Kurs nomi</label><input id="c-name" value="${c ? c.name : ''}"></div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Oylik narx (so'm)</label>
+        <input id="c-price" type="number" value="${c ? c.price : ''}" placeholder="1200000">
+      </div>
+      <div class="form-group">
+        <label>Davomiylik (oy)</label>
+        <input id="c-dur" type="number" value="${c ? c.duration_months : 1}" min="1" placeholder="3">
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Boshlanish sanasi</label>
+      <input type="date" id="c-start" value="${c && c.start_date ? c.start_date.slice(0,10) : ''}">
+    </div>
+    <div style="background:#ecfdf5;border:1px solid #a7f3d0;border-radius:8px;padding:10px;font-size:13px;color:#065f46;margin-top:4px">
+      Jami narx = Oylik narx × Davomiylik. O'quvchi yozilganda avtomatik qarz hisoblanadi.
+    </div>`;
+  const footer = `
+    <button class="btn btn-secondary" onclick="closeModal()">Bekor</button>
+    <button class="btn btn-primary" onclick="saveCourse(${cid||'null'})">${c ? 'Saqlash' : 'Yaratish'}</button>`;
+  openModal(title, body, footer);
+}
+
+
+async function saveCourse(id) {
+  const startVal = document.getElementById('c-start').value;
+  const durVal   = parseInt(document.getElementById('c-dur').value) || 1;
+  const body = {
+    name: document.getElementById('c-name').value.trim(),
+    price: parseFloat(document.getElementById('c-price').value),
+    duration_months: durVal,
+  };
+  if (startVal) body.start_date = startVal;
+  if (!body.name || isNaN(body.price)) return toast('Nom va narx majburiy', 'error');
+  const r = id ? await api('PATCH', `/courses/${id}`, body) : await api('POST', '/courses', body);
+  if (r.ok) { toast(id ? 'Yangilandi' : 'Yaratildi', 'success'); closeModal(); PAGES.courses(); }
+  else toast(r.data.message, 'error');
+}
+
+async function deleteCourse(id) {
+  if (!confirm("Kursni o'chirasizmi?")) return;
+  const r = await api('DELETE', `/courses/${id}`);
+  if (r.ok) { toast("O'chirildi", 'success'); PAGES.courses(); }
+  else toast(r.data.message, 'error');
+}
+
+// ── GROUPS ──
+PAGES.groups = async () => {
+  if (CURRENT_USER.role === 'ADMIN') document.getElementById('topbar-actions').innerHTML = `<button class="btn btn-primary" onclick="openGroupModal()">＋ Yangi guruh</button>`;
+  const r = await api('GET', '/groups');
+  if (!r.ok) return toast(r.data.message, 'error');
+  const groups = r.data.data;
+
+  document.getElementById('content').innerHTML = `
+    <div class="table-card">
+      <div class="table-header">
+        <div class="table-title">Guruhlar (${groups.length})</div>
+        <div class="search-box"><input type="text" placeholder="Qidirish..." oninput="filterGroup(this.value)"></div>
+      </div>
+      <div id="group-table">${renderGroupTable(groups)}</div>
+    </div>`;
+  window._groups = groups;
+  window.filterGroup = (q) => document.getElementById('group-table').innerHTML = renderGroupTable(searchFilter(groups, q, ['name','teacher_name']));
+};
+
+function renderGroupTable(list) {
+  return renderTable(['ID','Nomi',"O'qituvchi",'Kurs','Jadval','Boshlanish','Tugash','Davomiylik','Amallar'],
+    list.map(g => `<tr>
+      <td class="font-mono text-muted">#${g.id}</td>
+      <td><b>${g.name}</b></td>
+      <td>${g.teacher_name}</td>
+      <td>#${g.course_id}</td>
+      <td><span class="badge badge-blue">${g.schedule_type}</span></td>
+      <td>${dateStr(g.start_date)}</td>
+      <td>${dateStr(g.end_date)||'—'}</td>
+      <td><span class="badge badge-blue">${g.duration_months||'—'} oy</span></td>
+      <td><div class="td-actions">
+        <button class="btn btn-secondary btn-sm" onclick="viewGroupLessons(${g.id})">📅</button>
+        ${CURRENT_USER.role==='ADMIN' ? `
+          <button class="btn btn-secondary btn-sm" onclick='openGroupModal(${JSON.stringify(g)})'>✏️</button>
+          <button class="btn btn-secondary btn-sm" onclick="generateLessons(${g.id})">⚡</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteGroup(${g.id})">🗑</button>
+        ` : ''}
+      </div></td>
+    </tr>`), 'Guruh topilmadi');
+}
+
+async function openGroupModal(g=null) {
+  const cR = await api('GET', '/courses');
+  const courses = cR.ok ? cR.data.data : [];
+  window._coursesCache = courses; // start_date uchun saqlash
+  const gid = g ? g.id : null;
+  const cOpts = courses.map(c => `<option value="${c.id}" ${g && g.course_id==c.id ? 'selected' : ''}>${c.name} (${c.duration_months||1} oy)${c.start_date ? ' — ' + c.start_date.slice(0,10) : ''}</option>`).join('');
+  const title = g ? 'Guruhni tahrirlash' : 'Yangi guruh';
+  const body = `
+    <div class="form-row">
+      <div class="form-group"><label>Guruh nomi</label><input id="g-name" value="${g ? g.name : ''}"></div>
+      <div class="form-group"><label>O'qituvchi</label><input id="g-teacher" value="${g ? g.teacher_name : ''}"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Kurs</label>
+        <select id="g-course"><option value="">Tanlang...</option>${cOpts}</select>
+      </div>
+      <div class="form-group">
+        <label>Jadval</label>
+        <select id="g-schedule">
+          <option value="odd" ${g && g.schedule_type==='odd' ? 'selected' : ''}>Toq kunlar (Du,Chor,Ju)</option>
+          <option value="even" ${g && g.schedule_type==='even' ? 'selected' : ''}>Juft kunlar (Se,Pa,Sha)</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Dars vaqti</label>
+      <input id="g-time" value="${g ? g.lesson_time : '10:00:00'}" placeholder="10:00:00">
+    </div>
+    <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:10px;font-size:13px;color:#1d4ed8;margin-top:4px">
+      Boshlanish sanasi kurs bo'limida belgilanadi. Tugash sanasi ham kursning davomiyligidan avtomatik hisoblanadi. Darslar ham avtomatik yaratiladi.
+    </div>`;
+  const footer = `
+    <button class="btn btn-secondary" onclick="closeModal()">Bekor</button>
+    <button class="btn btn-primary" onclick="saveGroup(${gid||'null'})">${g ? 'Saqlash' : 'Yaratish'}</button>`;
+  openModal(title, body, footer, true);
+}
+
+
+async function saveGroup(id) {
+  const body = {
+    name: document.getElementById('g-name').value.trim(),
+    teacher_name: document.getElementById('g-teacher').value.trim(),
+    course_id: parseInt(document.getElementById('g-course').value),
+    schedule_type: document.getElementById('g-schedule').value,
+    lesson_time: document.getElementById('g-time').value.trim(),
+  };
+  // start_date kurs boshlanish sanasidan avtomatik olinadi
+  const selCourse = window._coursesCache && window._coursesCache.find(c => c.id === body.course_id);
+  if (selCourse && selCourse.start_date) body.start_date = selCourse.start_date;
+  else body.start_date = new Date().toISOString().slice(0,10); // fallback bugungi sana
+  if (!body.name || !body.teacher_name || !body.course_id) return toast("Barcha maydonlarni to'ldiring", 'error');
+  const r = id ? await api('PATCH', `/groups/${id}`, body) : await api('POST', '/groups', body);
+  if (r.ok) { toast(r.data.message || (id ? 'Yangilandi' : 'Yaratildi'), 'success'); closeModal(); PAGES.groups(); }
+  else toast(r.data.message, 'error');
+}
+
+async function deleteGroup(id) {
+  if (!confirm("Guruh va uning darslarini o'chirasizmi?")) return;
+  const r = await api('DELETE', `/groups/${id}`);
+  if (r.ok) { toast("O'chirildi", 'success'); PAGES.groups(); }
+  else toast(r.data.message, 'error');
+}
+
+async function generateLessons(id) {
+  const r = await api('POST', `/groups/${id}/generate-lessons`);
+  if (r.ok) toast(r.data.message || 'Darslar yaratildi', 'success');
+  else toast(r.data.message, 'error');
+}
+
+async function viewGroupLessons(id) {
+  const lr = await api('GET', `/manager/lessons?group_id=${id}`);
+  const lessons = lr.ok ? lr.data.data : [];
+  const rows = lessons.map(l => {
+    const cancelCell  = l.is_cancelled  ? `<span class="badge badge-red">Bekor: ${l.cancel_reason||''}</span>` : '—';
+    const reschedCell = l.is_rescheduled ? `<span class="badge badge-yellow">Ko'chirilgan</span>` : '—';
+    return `<tr><td>${dateStr(l.lesson_date)}</td><td>${l.lesson_time||'—'}</td><td>${cancelCell}</td><td>${reschedCell}</td></tr>`;
+  }).join('');
+  const tableHtml = rows
+    ? `<table><thead><tr><th>Sana</th><th>Vaqt</th><th>Bekor</th><th>Surilgan</th></tr></thead><tbody>${rows}</tbody></table>`
+    : `<div class="empty"><div class="empty-icon">📭</div><p>Dars yo'q</p></div>`;
+  const body = `<div style="max-height:400px;overflow-y:auto">${tableHtml}</div>`;
+  openModal(`Guruh #${id} — Darslar (${lessons.length})`, body, `<button class="btn btn-secondary" onclick="closeModal()">Yopish</button>`, true);
+}
+
+
+// ── LESSONS ──
+PAGES.lessons = async () => {
+  const gR = await api('GET', '/groups');
+  const groups = gR.ok ? gR.data.data : [];
+  document.getElementById('topbar-actions').innerHTML = `
+    <select id="lesson-group-sel" onchange="loadLessons(this.value)" style="padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-family:inherit">
+      <option value="">Guruh tanlang...</option>
+      ${groups.map(g => `<option value="${g.id}">${g.name}</option>`).join('')}
+    </select>
+    <button class="btn btn-secondary" onclick="openCancelModal()">📵 Darsni bekor qilish</button>
+  `;
+  document.getElementById('content').innerHTML = `<div class="empty"><div class="empty-icon">📅</div><p>Guruh tanlang</p></div>`;
+  window._lessonGroups = groups;
+};
+
+async function loadLessons(gid) {
+  if (!gid) return;
+  const r = await api('GET', `/lessons/group/${gid}`);
+  if (!r.ok) return toast(r.data.message, 'error');
+  const lessons = r.data.data;
+  document.getElementById('content').innerHTML = `
+    <div class="table-card">
+      <div class="table-header">
+        <div class="table-title">Darslar (${lessons.length})</div>
+      </div>
+      ${renderTable(['ID','Sana','Vaqt','Holat','Izoh','Amallar'],
+        lessons.map(l => `<tr>
+          <td class="font-mono text-muted">#${l.id}</td>
+          <td>${dateStr(l.lesson_date)}</td>
+          <td>${l.lesson_time}</td>
+          <td>${l.is_cancelled
+            ? '<span class="badge badge-red">Bekor</span>'
+            : l.is_rescheduled
+              ? '<span class="badge badge-yellow">Surilgan</span>'
+              : '<span class="badge badge-green">Faol</span>'}</td>
+          <td class="text-muted">${l.cancel_reason||'—'}</td>
+          <td><div class="td-actions">
+            ${l.is_cancelled
+              ? `<button class="btn btn-secondary btn-sm" onclick="restoreLesson(${l.id})">↩️ Tiklash</button>`
+              : `<button class="btn btn-secondary btn-sm" onclick="openMoveLesson(${l.id})">📆 Surish</button>`}
+          </div></td>
+        </tr>`), "Dars yo'q")}
+    </div>`;
+}
+
+async function openCancelModal() {
+  const gid = window._currentGroupId;
+  if (!gid) return toast('Guruh tanlanmagan', 'error');
+  const r = await api('GET', `/manager/lessons?group_id=${gid}`);
+  const lessons = r.ok ? r.data.data.filter(l => !l.is_cancelled) : [];
+  const opts = lessons.map(l => `<option value="${l.id}">${dateStr(l.lesson_date)}</option>`).join('');
+  const body = `
+    <div class="form-group"><label>Dars</label><select id="cancel-lesson-id">${opts}</select></div>
+    <div class="form-group"><label>Sabab</label><textarea id="cancel-reason" placeholder="Sabab..."></textarea></div>`;
+  const footer = `
+    <button class="btn btn-secondary" onclick="closeModal()">Bekor</button>
+    <button class="btn btn-danger" onclick="doCancelLesson()">Bekor qilish</button>`;
+  openModal('Darsni bekor qilish', body, footer);
+}
+
+
+async function doCancelLesson() {
+  const body = {
+    lesson_id: parseInt(document.getElementById('cancel-lesson-id').value),
+    reason: document.getElementById('cancel-reason').value.trim() || undefined,
+  };
+  if (!body.lesson_id) return toast('Dars tanlanmadi', 'error');
+  const r = await api('POST', '/lessons/cancel', body);
+  if (r.ok) { toast('Dars bekor qilindi va surildi', 'success'); closeModal(); }
+  else toast(r.data.message, 'error');
+}
+
+async function restoreLesson(id) {
+  const r = await api('PATCH', `/lessons/${id}/restore`);
+  if (r.ok) { toast('Dars tiklandi', 'success'); const gid = document.getElementById('lesson-group-sel')?.value; if (gid) loadLessons(gid); }
+  else toast(r.data.message, 'error');
+}
+
+function openMoveLesson(id) {
+  const body   = `<div class="form-group"><label>Yangi sana</label><input type="date" id="move-date"></div>`;
+  const footer = `
+    <button class="btn btn-secondary" onclick="closeModal()">Bekor</button>
+    <button class="btn btn-primary" onclick="doMoveLesson(${id})">O'tkazish</button>`;
+  openModal("Darsni boshqa kunga o'tkazish", body, footer);
+}
+
+
+async function doMoveLesson(id) {
+  const body = {
+    new_date: document.getElementById('move-date').value,
+  };
+  if (!body.new_date) return toast('Yangi sana kiritilmadi', 'error');
+  const r = await api('PATCH', `/lessons/${id}/move`, body);
+  if (r.ok) { toast("Dars o'tkazildi", 'success'); closeModal(); const gid = document.getElementById('lesson-group-sel')?.value; if (gid) loadLessons(gid); }
+  else toast(r.data.message, 'error');
+}
+
+// ── ATTENDANCE (YANGILANGAN) ──
+// Guruhlar avtomatik ko'rinadi, tanlanganda o'quvchilar + darslar chiqadi
+
+PAGES.attendance = async () => {
+  document.getElementById('topbar-actions').innerHTML = '';
+  const gR = await api('GET', '/manager/groups');
+  const groups = gR.ok ? gR.data.data : [];
+
+  if (!groups.length) {
+    document.getElementById('content').innerHTML = `
+      <div class="empty">
+        <div class="empty-icon">📭</div>
+        <p>Guruhlar mavjud emas</p>
+      </div>`;
+    return;
+  }
+
+  // Har bir guruh uchun o'quvchilar sonini olish
+  const studentCounts = await Promise.all(
+    groups.map(g => api('GET', `/manager/groups/${g.id}/students`)
+      .then(r => ({ id: g.id, count: r.ok ? (r.data.data.students || []).length : 0 }))
+      .catch(() => ({ id: g.id, count: 0 }))
+    )
+  );
+  const countMap = {};
+  studentCounts.forEach(x => { countMap[x.id] = x.count; });
+
+  const cards = groups.map(g => {
+    const cnt = countMap[g.id] || 0;
+    const scheduleLabel = g.schedule_type === 'odd' ? 'Toq kunlar' : 'Juft kunlar';
+    return `
+      <div class="att-group-card" onclick="attSelectGroup(${g.id}, '${g.name}')" id="att-gc-${g.id}">
+        <div class="att-group-card-header">
+          <div>
+            <div class="att-group-name">${g.name}</div>
+            <div class="att-group-meta">📚 ${g.course_name || '—'}</div>
+          </div>
+          <span class="badge badge-blue">#${g.id}</span>
+        </div>
+        <div style="font-size:12px;color:var(--text-2)">
+          👨‍🏫 ${g.teacher_name}
+        </div>
+        <div style="font-size:12px;color:var(--text-3);margin-top:4px">
+          📅 ${scheduleLabel} &nbsp;·&nbsp; ⏰ ${g.lesson_time ? g.lesson_time.slice(0,5) : '—'}
+        </div>
+        <div class="att-group-stats">
+          <div class="att-group-stat">
+            <div class="att-group-stat-val">${cnt}</div>
+            <div class="att-group-stat-lbl">O'quvchi</div>
+          </div>
+          <div class="att-group-stat">
+            <div class="att-group-stat-val">${g.duration_months || '—'}</div>
+            <div class="att-group-stat-lbl">Oy</div>
+          </div>
+        </div>
+      </div>`;
+  }).join('');
+
+  document.getElementById('content').innerHTML = `
+    <div style="margin-bottom:16px;font-size:14px;font-weight:600;color:var(--text-2)">
+      Davomat belgilash uchun guruhni tanlang:
+    </div>
+    <div class="att-group-grid">${cards}</div>
+    <div id="att-detail-area"></div>`;
+};
+
+async function attSelectGroup(groupId, groupName) {
+  // Tanlangan kartani highlight qilish
+  document.querySelectorAll('.att-group-card').forEach(el => el.classList.remove('selected'));
+  const card = document.getElementById(`att-gc-${groupId}`);
+  if (card) {
+    card.classList.add('selected');
+    card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  const detailArea = document.getElementById('att-detail-area');
+  detailArea.innerHTML = `<div style="text-align:center;padding:24px;color:var(--text-3)">⏳ Yuklanmoqda...</div>`;
+
+  // Hisobot tugmasini topbar ga qo'shish
+  document.getElementById('topbar-actions').innerHTML =
+    `<button class="btn btn-secondary" onclick="showStudentAttReport(${groupId})">📊 O'quvchi Hisoboti</button>`;
+
+  await loadGroupForAttendance(groupId);
+}
+
+
+async function loadGroupForAttendance(groupId) {
+  if (!groupId) return;
+  const [lR, sR, attR] = await Promise.all([
+    api('GET', `/manager/groups/${groupId}/lessons`),
+    api('GET', `/manager/groups/${groupId}/students`),
+    api('GET', `/manager/attendance?group_id=${groupId}`)
+  ]);
+  const lessonsRaw = lR.ok ? lR.data.data : [];
+  const students   = sR.ok ? sR.data.data.students : [];
+  const allAtt     = attR.ok ? attR.data.data : [];
+
+  // Qaysi darslarda davomat bor — lessonId set
+  const markedLessons = new Set(allAtt.map(a => a.lesson_id));
+  const lessons = lessonsRaw.map(l => ({ ...l, has_attendance: markedLessons.has(l.id) }));
+
+  window._groupStudents  = students;
+  window._currentGroupId = groupId;
+
+  const target = document.getElementById('att-detail-area') || document.getElementById('content');
+  target.innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px">
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px">
+        <div style="font-size:13px;font-weight:600;color:var(--text-2);margin-bottom:10px">
+          👥 Guruh o'quvchilari (${students.length})
+        </div>
+        ${students.length
+          ? students.map(s => `<div style="padding:6px 0;border-bottom:1px solid var(--border);font-size:13px">
+              <b>${s.full_name}</b> <span style="color:var(--text-3)">${s.phone_number||''}</span>
+            </div>`).join('')
+          : '<p style="color:var(--text-3)">O&#39;quvchi yo&#39;q</p>'}
+      </div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px">
+        <div style="font-size:13px;font-weight:600;color:var(--text-2);margin-bottom:10px">
+          📅 Dars tanlang va davomat belgilang
+        </div>
+        <div style="max-height:260px;overflow-y:auto">
+          ${lessons.length
+            ? lessons.map(l => `
+              <div onclick="${l.is_cancelled ? '' : `openMarkForLesson(${l.id},'${l.lesson_date}')`}"
+                style="padding:8px 10px;border-radius:6px;cursor:${l.is_cancelled?'default':'pointer'};margin-bottom:4px;
+                       background:var(--surface2);border:1px solid var(--border);display:flex;
+                       justify-content:space-between;align-items:center;opacity:${l.is_cancelled?'0.5':'1'}"
+                ${l.is_cancelled ? '' : "onmouseover=\"this.style.background='var(--blue-50)'\" onmouseout=\"this.style.background='var(--surface2)'\""  }>
+                <span style="font-weight:500">${new Date(l.lesson_date).toLocaleDateString('uz-UZ')}</span>
+                ${l.is_cancelled
+                  ? '<span class="badge badge-red">Bekor qilingan</span>'
+                  : l.has_attendance
+                    ? '<span class="badge badge-green">✅ Belgilangan</span>'
+                    : '<span class="badge badge-yellow">⬜ Belgilash</span>'}
+              </div>`).join('')
+            : '<p style="color:var(--text-3)">Dars yo&#39;q</p>'}
+        </div>
+      </div>
+    </div>
+    <div id="att-records-area"></div>`;
+}
+
+async function openMarkForLesson(lessonId, lessonDate) {
+  const students = window._groupStudents || [];
+  if (!students.length) return toast("Guruhda faol o'quvchi yo'q", 'error');
+
+  // Mavjud davomatlarni olish
+  const attR = await api('GET', `/manager/attendance?lesson_id=${lessonId}`);
+  const existing = {};
+  const existingIds = {}; // attendance id lar
+  if (attR.ok) attR.data.data.forEach(a => {
+    existing[a.student_id]   = a.status;
+    existingIds[a.student_id] = a.id;
+  });
+
+  window._attRecords    = {};
+  window._attExistingIds = existingIds;
+  window._attLessonId   = lessonId;
+
+  const alreadyMarked = Object.keys(existing).length > 0;
+  students.forEach(s => {
+    window._attRecords[s.student_id] = existing[s.student_id] || 'keldi';
+  });
+
+  const icons = { keldi: '✅ keldi', kelmadi: '❌ kelmadi', kechikdi: '⚠️ kechikdi' };
+  const gridHtml = students.map(s => {
+    const st = window._attRecords[s.student_id] || 'keldi';
+    return `
+      <div class="att-student ${st}" id="att-${s.student_id}" onclick="cycleAtt(${s.student_id})">
+        <div class="att-name">${s.full_name}</div>
+        <div class="att-status" id="att-st-${s.student_id}">${icons[st]}</div>
+      </div>`;
+  }).join('') || `<p style="color:var(--text-3)">O'quvchi yo'q</p>`;
+
+  const dateLabel = new Date(lessonDate).toLocaleDateString('uz-UZ');
+  const markedNote = alreadyMarked
+    ? `<div style="background:#ecfdf5;border:1px solid #6ee7b7;border-radius:8px;padding:8px 12px;font-size:13px;color:#065f46;margin-bottom:12px">✅ Bu darsda davomat avval belgilangan — o'zgartirish mumkin</div>`
+    : `<div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:8px 12px;font-size:13px;color:#1d4ed8;margin-bottom:12px">ℹ️ Bosib holat o'zgartiring: ✅ keldi → ❌ kelmadi → ⚠️ kechikdi</div>`;
+
+  const body = markedNote + `<div class="attendance-grid" id="att-grid">${gridHtml}</div>`;
+  const footer = `
+    <button class="btn btn-secondary" onclick="closeModal()">Bekor</button>
+    <button class="btn btn-primary" onclick="submitAttendance(${lessonId})">💾 Saqlash</button>`;
+  openModal(`✅ Davomat — ${dateLabel}`, body, footer, true);
+}
+
+
+
+function cycleAtt(sid) {
+  const order = ['keldi', 'kelmadi', 'kechikdi'];
+  const icons  = { keldi: '✅ keldi', kelmadi: '❌ kelmadi', kechikdi: '⚠️ kechikdi' };
+  const cur  = window._attRecords[sid] || 'keldi';
+  const next = order[(order.indexOf(cur) + 1) % 3];
+  window._attRecords[sid] = next;
+  document.getElementById(`att-${sid}`).className = `att-student ${next}`;
+  document.getElementById(`att-st-${sid}`).textContent = icons[next];
+}
+
+async function submitAttendance(lessonId) {
+  const records = Object.entries(window._attRecords).map(([sid, status]) => ({
+    student_id: parseInt(sid), status
+  }));
+  if (!records.length) return toast("O'quvchi yo'q", 'error');
+  const r = await api('POST', '/manager/attendance', { lesson_id: lessonId, records });
+  if (r.ok) {
+    const saved  = r.data.data.saved  || [];
+    const errors = r.data.data.errors || [];
+    if (errors.length)
+      toast(`⚠️ ${saved.length} ta saqlandi, ${errors.length} ta xato`, 'info');
+    else
+      toast(`✅ ${saved.length} ta o'quvchi davomati saqlandi!`, 'success');
+    closeModal();
+    // Dars ro'yxatidagi badgeni yangilash
+    if (window._currentGroupId) await loadGroupForAttendance(window._currentGroupId);
+  } else toast(r.data.message || 'Xatolik yuz berdi', 'error');
+}
+
+// Davomat yozuvini tahrirlash (mavjud funksiya saqlanadi)
+function editAtt(id, current) {
+  const statuses = ['keldi','kelmadi','kechikdi'];
+  const opts = statuses.map(s => `<option value="${s}" ${s===current ? 'selected' : ''}>${s}</option>`).join('');
+  const body   = `<div class="form-group"><label>Holat</label><select id="att-new-status">${opts}</select></div>`;
+  const footer = `
+    <button class="btn btn-secondary" onclick="closeModal()">Bekor</button>
+    <button class="btn btn-primary" onclick="doEditAtt(${id})">Saqlash</button>`;
+  openModal("Davomatni o'zgartirish", body, footer);
+}
+
+
+async function doEditAtt(id) {
+  const r = await api('PATCH', `/manager/attendance/${id}`, { status: document.getElementById('att-new-status').value });
+  if (r.ok) { toast('Yangilandi', 'success'); closeModal(); }
+  else toast(r.data.message, 'error');
+}
+
+async function deleteAtt(id) {
+  if (!confirm("O'chirasizmi?")) return;
+  const r = await api('DELETE', `/manager/attendance/${id}`);
+  if (r.ok) toast("O'chirildi", 'success');
+  else toast(r.data.message, 'error');
+}
+
+// O'quvchi davomat hisoboti — guruh bo'yicha
+async function showStudentAttReport(groupId) {
+  const [sR, attR, lR] = await Promise.all([
+    api('GET', `/manager/groups/${groupId}/students`),
+    api('GET', `/manager/attendance?group_id=${groupId}`),
+    api('GET', `/manager/groups/${groupId}/lessons`)
+  ]);
+  if (!sR.ok) return toast('Xatolik', 'error');
+
+  const students     = sR.data.data.students || [];
+  const allAtt       = attR.ok ? attR.data.data : [];
+  const allLessons   = lR.ok ? lR.data.data : [];
+
+  // Faqat o'tilgan (bekor qilinmagan) darslar
+  const doneLessons  = allLessons.filter(l => !l.is_cancelled);
+  const totalLessons = doneLessons.length;
+
+  // Har o'quvchi uchun statistika
+  const stats = students.map(s => {
+    const myAtt     = allAtt.filter(a => a.student_id === s.student_id);
+    const keldi     = myAtt.filter(a => a.status === 'keldi').length;
+    const kelmadi   = myAtt.filter(a => a.status === 'kelmadi').length;
+    const kechikdi  = myAtt.filter(a => a.status === 'kechikdi').length;
+    const belgilanmagan = totalLessons - (keldi + kelmadi + kechikdi);
+    const pct = totalLessons ? Math.round((keldi + kechikdi) / totalLessons * 100) : 0;
+    return { ...s, keldi, kelmadi, kechikdi, belgilanmagan, pct, totalLessons };
+  });
+
+  const rows = stats.map(s => `
+    <tr>
+      <td><b>${s.full_name}</b><br><span style="color:var(--text-3);font-size:11px">${s.phone_number||''}</span></td>
+      <td style="text-align:center">${s.totalLessons}</td>
+      <td style="text-align:center;color:#059669;font-weight:600">${s.keldi}</td>
+      <td style="text-align:center;color:#dc2626;font-weight:600">${s.kelmadi}</td>
+      <td style="text-align:center;color:#d97706;font-weight:600">${s.kechikdi}</td>
+      <td style="text-align:center;color:var(--text-3)">${s.belgilanmagan}</td>
+      <td style="text-align:center">
+        <div style="background:#e5e7eb;border-radius:20px;height:8px;width:80px;overflow:hidden;display:inline-block;vertical-align:middle">
+          <div style="background:${s.pct>=80?'#059669':s.pct>=50?'#d97706':'#dc2626'};height:100%;width:${s.pct}%"></div>
+        </div>
+        <span style="font-size:12px;margin-left:6px;font-weight:600;color:${s.pct>=80?'#059669':s.pct>=50?'#d97706':'#dc2626'}">${s.pct}%</span>
+      </td>
+    </tr>`);
+
+  const body = `
+    <div style="background:#eff6ff;border-radius:8px;padding:10px 14px;font-size:13px;color:#1d4ed8;margin-bottom:14px">
+      📊 Jami <b>${totalLessons}</b> ta dars o'tilgan
+    </div>
+    <table>
+      <thead><tr>
+        <th>O'quvchi</th><th style="text-align:center">Jami dars</th>
+        <th style="text-align:center">✅ Keldi</th>
+        <th style="text-align:center">❌ Kelmadi</th>
+        <th style="text-align:center">⚠️ Kechikdi</th>
+        <th style="text-align:center">⬜ Noma'lum</th>
+        <th style="text-align:center">Davomat %</th>
+      </tr></thead>
+      <tbody>${rows.join('')}</tbody>
+    </table>`;
+
+  openModal('📊 Oquvchilar Davomat Hisoboti', body,
+    `<button class="btn btn-secondary" onclick="closeModal()">Yopish</button>`, true);
+}
+
+
+// ── EXPENSES (HARAJATLAR) ──
+PAGES.expenses = async () => {
+  if (!['ADMIN','MANAGER'].includes(CURRENT_USER.role)) {
+    document.getElementById('content').innerHTML = '<div class="empty"><div class="empty-icon">🚫</div><p>Ruxsat yo&#39;q</p></div>';
+    return;
+  }
+  document.getElementById('topbar-actions').innerHTML = `
+    <button class="btn btn-secondary" onclick="showExpenseSummary()">📊 Moliyaviy hisobot</button>
+    <button class="btn btn-primary" onclick="openExpenseModal()">＋ Harajat kiritish</button>`;
+  await loadExpenses();
+};
+
+async function loadExpenses(from='', to='') {
+  let url = '/expenses';
+  const params = [];
+  if (from) params.push(`from=${from}`);
+  if (to)   params.push(`to=${to}`);
+  if (params.length) url += '?' + params.join('&');
+
+  const r = await api('GET', url);
+  if (!r.ok) return toast(r.data.message, 'error');
+  const expenses = r.data.data;
+  const total = expenses.reduce((s, e) => s + parseFloat(e.amount || 0), 0);
+
+  document.getElementById('content').innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px">
+      <div class="summary-card" style="background:linear-gradient(135deg,#fef2f2,#fee2e2);border:1px solid #fecaca">
+        <h3 style="color:#991b1b;font-size:13px;margin-bottom:6px">💸 Jami Harajatlar</h3>
+        <div class="amount" style="color:#dc2626">${money(total)}</div>
+        <div style="font-size:12px;color:#b91c1c;margin-top:4px">${expenses.length} ta yozuv</div>
+      </div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px">
+        <div style="font-size:13px;font-weight:600;color:var(--text-2);margin-bottom:10px">📅 Sana bo'yicha filter</div>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+          <input type="date" id="exp-from" value="${from}"
+            style="padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-family:inherit;font-size:13px">
+          <span style="color:var(--text-3)">—</span>
+          <input type="date" id="exp-to" value="${to}"
+            style="padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-family:inherit;font-size:13px">
+          <button class="btn btn-secondary btn-sm" onclick="filterExpenses()">Filtr</button>
+          <button class="btn btn-secondary btn-sm" onclick="loadExpenses()">Tozalash</button>
+        </div>
+      </div>
+    </div>
+    <div class="table-card">
+      <div class="table-header">
+        <div class="table-title">Harajatlar (${expenses.length})</div>
+        <div class="search-box"><input type="text" placeholder="Qidirish..." oninput="filterExpLocal(this.value)"></div>
+      </div>
+      <div id="exp-table">${renderExpTable(expenses)}</div>
+    </div>`;
+
+  window._expenses = expenses;
+  window.filterExpLocal = (q) => {
+    const fields = ['description','category','creator_name'];
+    const filtered = !q ? expenses : expenses.filter(e => fields.some(f => String(e[f]||'').toLowerCase().includes(q.toLowerCase())));
+    document.getElementById('exp-table').innerHTML = renderExpTable(filtered);
+  };
+}
+
+function catBadge(c) {
+  const m = { ijara:'badge-red', maosh:'badge-blue', jihozlar:'badge-yellow', kommunal:'badge-gray', marketing:'badge-green', boshqa:'badge-gray' };
+  const ic = { ijara:'🏠 ', maosh:'👤 ', jihozlar:'🔧 ', kommunal:'💡 ', marketing:'📣 ', boshqa:'📌 ' };
+  return `<span class="badge ${m[c]||'badge-gray'}">${ic[c]||''}${c||'boshqa'}</span>`;
+}
+
+function renderExpTable(list) {
+  if (!list.length) return '<div class="empty"><div class="empty-icon">📭</div><p>Harajat yo&#39;q</p></div>';
+  return renderTable(
+    ['ID','Sana','Tavsif','Kategoriya','Miqdor','Kim kiritdi','Amallar'],
+    list.map(e => `<tr>
+      <td class="font-mono text-muted">#${e.id}</td>
+      <td>${new Date(e.expense_date).toLocaleDateString('uz-UZ')}</td>
+      <td><b>${e.description}</b></td>
+      <td>${catBadge(e.category)}</td>
+      <td class="font-mono" style="color:#dc2626"><b>${money(e.amount)}</b></td>
+      <td class="text-muted">${e.creator_name||'—'}</td>
+      <td><div class="td-actions">
+        ${CURRENT_USER.role === 'ADMIN'
+          ? `<button class="btn btn-danger btn-sm" onclick="deleteExpense(${e.id})">🗑</button>`
+          : '<span style="color:var(--text-3);font-size:11px">Faqat admin</span>'}
+      </div></td>
+    </tr>`)
+  );
+}
+
+function filterExpenses() {
+  const from = document.getElementById('exp-from')?.value || '';
+  const to   = document.getElementById('exp-to')?.value   || '';
+  loadExpenses(from, to);
+}
+
+function openExpenseModal() {
+  const today = new Date().toISOString().split('T')[0];
+  const body = `
+    <div class="form-row">
+      <div class="form-group">
+        <label>Miqdor (so'm)</label>
+        <input id="ex-amount" type="number" placeholder="500000" min="0">
+      </div>
+      <div class="form-group">
+        <label>Kategoriya</label>
+        <select id="ex-cat">
+          <option value="ijara">🏠 Ijara</option>
+          <option value="maosh">👤 Maosh</option>
+          <option value="jihozlar">🔧 Jihozlar</option>
+          <option value="kommunal">💡 Kommunal</option>
+          <option value="marketing">📣 Marketing</option>
+          <option value="boshqa" selected>📌 Boshqa</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Tavsif — nimagaligini yozing</label>
+      <input id="ex-desc" placeholder="masalan: Mart oyi ijara to'lovi">
+    </div>
+    <div class="form-group">
+      <label>Sana</label>
+      <input id="ex-date" type="date" value="${today}">
+    </div>`;
+  const footer = `
+    <button class="btn btn-secondary" onclick="closeModal()">Bekor</button>
+    <button class="btn btn-primary" onclick="saveExpense()">💾 Saqlash</button>`;
+  openModal('💸 Harajat kiritish', body, footer);
+}
+
+
+async function saveExpense() {
+  const amount = parseFloat(document.getElementById('ex-amount').value);
+  const desc   = document.getElementById('ex-desc').value.trim();
+  const cat    = document.getElementById('ex-cat').value;
+  const dt     = document.getElementById('ex-date').value;
+  if (!amount || amount <= 0) return toast('Miqdorni kiriting', 'error');
+  if (!desc) return toast('Tavsifni kiriting', 'error');
+  const r = await api('POST', '/expenses', { amount, description: desc, category: cat, expense_date: dt });
+  if (r.ok) { toast('✅ Harajat saqlandi', 'success'); closeModal(); loadExpenses(); }
+  else toast(r.data.message, 'error');
+}
+
+async function deleteExpense(id) {
+  if (!confirm("Harajatni o'chirasizmi?")) return;
+  const r = await api('DELETE', `/expenses/${id}`);
+  if (r.ok) { toast("O'chirildi", 'success'); loadExpenses(); }
+  else toast(r.data.message, 'error');
+}
+
+async function showExpenseSummary() {
+  const from = document.getElementById('exp-from') ? document.getElementById('exp-from').value : '';
+  const to   = document.getElementById('exp-to')   ? document.getElementById('exp-to').value   : '';
+  let url = '/expenses/summary';
+  const params = [];
+  if (from) params.push(`from=${from}`);
+  if (to)   params.push(`to=${to}`);
+  if (params.length) url += '?' + params.join('&');
+  const r = await api('GET', url);
+  if (!r.ok) return toast(r.data.message, 'error');
+  const d = r.data.data;
+  const byCat = d.by_category || {};
+  const catRows = Object.entries(byCat).length
+    ? Object.entries(byCat).map(([cat, amt]) => `
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)">
+          <span>${catBadge(cat)}</span>
+          <span style="font-weight:600;color:#dc2626">${money(amt)}</span>
+        </div>`).join('')
+    : `<p style="color:var(--text-3);text-align:center;padding:12px">Ma'lumot yo'q</p>`;
+  const np    = d.net_profit;
+  const pc    = np >= 0 ? '#059669' : '#dc2626';
+  const pi    = np >= 0 ? '📈' : '📉';
+  const npBg  = np >= 0 ? '#ecfdf5' : '#fef2f2';
+  const npBrd = np >= 0 ? '#a7f3d0' : '#fecaca';
+  const body = `
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:20px">
+      <div style="background:#ecfdf5;border:1px solid #a7f3d0;border-radius:10px;padding:16px;text-align:center">
+        <div style="font-size:11px;color:#065f46;font-weight:600;margin-bottom:4px">💰 KIRIM</div>
+        <div style="font-size:18px;font-weight:700;color:#059669">${money(d.total_income)}</div>
+        <div style="font-size:11px;color:#065f46">To'lovlar</div>
+      </div>
+      <div style="background:#fef2f2;border:1px solid #fecaca;border-radius:10px;padding:16px;text-align:center">
+        <div style="font-size:11px;color:#991b1b;font-weight:600;margin-bottom:4px">💸 CHIQIM</div>
+        <div style="font-size:18px;font-weight:700;color:#dc2626">${money(d.total_expense)}</div>
+        <div style="font-size:11px;color:#991b1b">Harajatlar</div>
+      </div>
+      <div style="background:${npBg};border:1px solid ${npBrd};border-radius:10px;padding:16px;text-align:center">
+        <div style="font-size:11px;color:${pc};font-weight:600;margin-bottom:4px">${pi} SOF FOYDA</div>
+        <div style="font-size:18px;font-weight:700;color:${pc}">${money(Math.abs(np))}</div>
+        <div style="font-size:11px;color:${pc}">${np < 0 ? 'Zarar' : 'Foyda'}</div>
+      </div>
+    </div>
+    <div style="font-size:13px;font-weight:600;color:var(--text-2);margin-bottom:8px">Kategoriya bo'yicha harajatlar</div>
+    ${catRows}
+    <div style="margin-top:12px;padding:10px;background:var(--blue-50);border-radius:8px;font-size:12px;color:var(--blue-700)">
+      Jami ${d.expense_count} ta harajat yozuvi
+    </div>`;
+  openModal('📊 Moliyaviy Hisobot', body, `<button class="btn btn-secondary" onclick="closeModal()">Yopish</button>`, true);
+}
+
+
+
+async function viewStudentDebt(id) {
+  const r = await api('GET', `/operator/debts/student/${id}`);
+  if (!r.ok) return toast(r.data.message, 'error');
+  const d = r.data.data;
+  const remBg  = d.total_remaining > 0 ? '#fff7ed' : '#ecfdf5';
+  const remClr = d.total_remaining > 0 ? '#92400e' : '#065f46';
+  const remVal = d.total_remaining > 0 ? '#d97706' : '#059669';
+  const debtRows = d.debts.map(debt => {
+    const fullyPaid = debt.is_fully_paid
+      ? `<div style="margin-top:6px"><span class="badge badge-green">✅ To'liq to'langan</span></div>`
+      : '';
+    const clr = debt.remaining_debt > 0 ? '#d97706' : '#059669';
+    return `
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:8px">
+        <div style="display:flex;justify-content:space-between;font-size:13px;flex-wrap:wrap;gap:6px">
+          <span>Jami: <b>${money(debt.total_amount)}</b></span>
+          <span>To'langan: <b style="color:#059669">${money(debt.paid_amount)}</b></span>
+          <span>Qoldi: <b style="color:${clr}">${money(debt.remaining_debt)}</b></span>
+        </div>
+        ${fullyPaid}
+      </div>`;
+  }).join('') || `<p style="color:var(--text-3);text-align:center">Qarz ma'lumoti yo'q</p>`;
+  const body = `
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px">
+      <div style="background:#fef2f2;border-radius:8px;padding:12px;text-align:center">
+        <div style="font-size:11px;font-weight:600;color:#991b1b;margin-bottom:4px">JAMI QARZ</div>
+        <div style="font-weight:700;color:#dc2626">${money(d.total_debt)}</div>
+      </div>
+      <div style="background:#ecfdf5;border-radius:8px;padding:12px;text-align:center">
+        <div style="font-size:11px;font-weight:600;color:#065f46;margin-bottom:4px">TO'LANGAN</div>
+        <div style="font-weight:700;color:#059669">${money(d.total_paid)}</div>
+      </div>
+      <div style="background:${remBg};border-radius:8px;padding:12px;text-align:center">
+        <div style="font-size:11px;font-weight:600;color:${remClr};margin-bottom:4px">QOLGAN QARZ</div>
+        <div style="font-weight:700;color:${remVal}">${money(d.total_remaining)}</div>
+      </div>
+    </div>
+    ${debtRows}`;
+  openModal(`💳 ${d.student_name} — Qarz holati`, body, `<button class="btn btn-secondary" onclick="closeModal()">Yopish</button>`);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// PAGES.teachers  —  O'qituvchilar
+// ═══════════════════════════════════════════════════════════════
+PAGES.teachers = async () => {
+  if (['ADMIN','MANAGER'].includes(CURRENT_USER.role)) {
+    document.getElementById('topbar-actions').innerHTML =
+      CURRENT_USER.role === 'ADMIN'
+        ? `<button class="btn btn-primary" onclick="openTeacherModal()">＋ Yangi o'qituvchi</button>`
+        : '';
+  }
+  const r = await api('GET', '/teachers');
+  if (!r.ok) return toast(r.data.message, 'error');
+  const teachers = r.data.data;
+
+  document.getElementById('content').innerHTML = `
+    <div class="table-card">
+      <div class="table-header">
+        <div class="table-title">O'qituvchilar (${teachers.length})</div>
+        <div class="search-box"><input type="text" placeholder="Qidirish..." oninput="filterTeacher(this.value)"></div>
+      </div>
+      <div id="teacher-table">${renderTeacherTable(teachers)}</div>
+    </div>`;
+  window._teachers = teachers;
+  window.filterTeacher = q =>
+    document.getElementById('teacher-table').innerHTML =
+      renderTeacherTable(searchFilter(teachers, q, ['full_name','phone_number']));
+};
+
+function renderTeacherTable(list) {
+  return renderTable(
+    ['ID',"Ism Familiya","Telefon","Oylik foizi","Guruhlar","Amallar"],
+    list.map(t => `<tr>
+      <td class="font-mono text-muted">#${t.id}</td>
+      <td><b>${t.full_name}</b></td>
+      <td class="font-mono">${t.phone_number}</td>
+      <td><span class="badge badge-green">${t.salary_percent}%</span></td>
+      <td><button class="btn btn-secondary btn-sm" onclick="viewTeacherGroups(${t.id},'${t.full_name}')">📋 Ko'rish</button></td>
+      <td><div class="td-actions">
+        ${CURRENT_USER.role==='ADMIN' ? `
+          <button class="btn btn-secondary btn-sm" onclick='openTeacherModal(${JSON.stringify(t)})'>✏️</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteTeacher(${t.id})">🗑</button>
+        ` : ''}
+        <button class="btn btn-secondary btn-sm" onclick="viewTeacherSalary(${t.id},'${t.full_name}')">💰</button>
+      </div></td>
+    </tr>`),
+    "O'qituvchi topilmadi"
+  );
+}
+
+function openTeacherModal(t=null) {
+  const id    = t ? t.id : null;
+  const title = t ? "O'qituvchini tahrirlash" : "Yangi o'qituvchi";
+  const body  = `
+    <div class="form-row">
+      <div class="form-group"><label>Ism Familiya</label><input id="t-name" value="${t ? t.full_name : ''}"></div>
+      <div class="form-group"><label>Telefon raqam</label><input id="t-phone" value="${t ? t.phone_number : ''}" placeholder="+998901234567"></div>
+    </div>
+    <div class="form-group">
+      <label>Oylik foizi (%)</label>
+      <input id="t-percent" type="number" min="1" max="100" step="0.5" value="${t ? t.salary_percent : '20'}" placeholder="20">
+      <small style="color:var(--text-3)">Masalan: 20 — guruh to'lovining 20% i o'qituvchiga beriladi</small>
+    </div>`;
+  const footer = `
+    <button class="btn btn-secondary" onclick="closeModal()">Bekor</button>
+    <button class="btn btn-primary" onclick="saveTeacher(${id||'null'})">${t ? 'Saqlash' : 'Qo\'shish'}</button>`;
+  openModal(title, body, footer);
+}
+
+async function saveTeacher(id) {
+  const body = {
+    full_name:      document.getElementById('t-name').value.trim(),
+    phone_number:   document.getElementById('t-phone').value.trim(),
+    salary_percent: parseFloat(document.getElementById('t-percent').value),
+  };
+  if (!body.full_name || !body.phone_number || isNaN(body.salary_percent))
+    return toast("Barcha maydonlarni to'ldiring", 'error');
+  const r = id ? await api('PATCH', `/teachers/${id}`, body) : await api('POST', '/teachers', body);
+  if (r.ok) { toast(id ? 'Yangilandi' : "O'qituvchi qo'shildi", 'success'); closeModal(); PAGES.teachers(); }
+  else toast(r.data.message, 'error');
+}
+
+async function deleteTeacher(id) {
+  if (!confirm("O'qituvchini o'chirasizmi?")) return;
+  const r = await api('DELETE', `/teachers/${id}`);
+  if (r.ok) { toast("O'chirildi", 'success'); PAGES.teachers(); }
+  else toast(r.data.message, 'error');
+}
+
+async function viewTeacherGroups(id, name) {
+  const r = await api('GET', '/groups');
+  if (!r.ok) return toast(r.data.message, 'error');
+  const groups = (r.data.data || []).filter(g => g.teacher_id === id);
+  const rows = groups.length
+    ? groups.map(g => `<tr>
+        <td><b>${g.name}</b></td>
+        <td>${g.course_name||'—'}</td>
+        <td><span class="badge badge-blue">${g.schedule_type}</span></td>
+        <td>${dateStr(g.start_date)}</td>
+        <td>${dateStr(g.end_date)||'—'}</td>
+      </tr>`).join('')
+    : `<tr><td colspan="5" style="text-align:center;color:var(--text-3)">Guruh yo'q</td></tr>`;
+  const body = `<table><thead><tr><th>Guruh</th><th>Kurs</th><th>Jadval</th><th>Boshlanish</th><th>Tugash</th></tr></thead><tbody>${rows}</tbody></table>`;
+  openModal(`👨‍🏫 ${name} — Guruhlar`, body, `<button class="btn btn-secondary" onclick="closeModal()">Yopish</button>`, true);
+}
+
+async function viewTeacherSalary(id, name) {
+  const r = await api('GET', `/teachers/${id}/salary-report`);
+  if (!r.ok) return toast(r.data.message, 'error');
+  const d = r.data.data;
+  const rows = d.records.length
+    ? d.records.map(rec => `<tr>
+        <td>${rec.for_month}</td>
+        <td>${rec.group_name||'—'}</td>
+        <td style="color:var(--blue-600);font-weight:600">${money(rec.total_payments)}</td>
+        <td style="color:var(--success);font-weight:600">${money(rec.teacher_salary)}</td>
+        <td style="color:var(--text-2)">${money(rec.net_profit)}</td>
+      </tr>`).join('')
+    : `<tr><td colspan="5" style="text-align:center;color:var(--text-3)">Hisob-kitob yo'q</td></tr>`;
+  const body = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
+      <div style="background:#ecfdf5;border-radius:8px;padding:12px;text-align:center">
+        <div style="font-size:11px;font-weight:600;color:#065f46;margin-bottom:4px">JAMI OYLIK (BARCHA OY)</div>
+        <div style="font-weight:700;color:#059669;font-size:16px">${money(d.total_earned)}</div>
+      </div>
+      <div style="background:#eff6ff;border-radius:8px;padding:12px;text-align:center">
+        <div style="font-size:11px;font-weight:600;color:#1e40af;margin-bottom:4px">OYLIK FOIZI</div>
+        <div style="font-weight:700;color:#2563eb;font-size:16px">${d.teacher.salary_percent}%</div>
+      </div>
+    </div>
+    <table><thead><tr><th>Oy</th><th>Guruh</th><th>Jami to'lov</th><th>Oylik</th><th>Sof foyda</th></tr></thead>
+    <tbody>${rows}</tbody></table>`;
+  openModal(`💰 ${name} — Oylik hisobot`, body, `<button class="btn btn-secondary" onclick="closeModal()">Yopish</button>`, true);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// PAGES.salaries  —  Guruh oylik hisob-kitob
+// ═══════════════════════════════════════════════════════════════
+PAGES.salaries = async () => {
+  const rG = await api('GET', '/groups');
+  if (!rG.ok) return toast(rG.data.message, 'error');
+  const groups = (rG.data.data || []).filter(g => g.teacher_id);
+
+  // Default oy: joriy oy
+  const nowMonth = new Date().toISOString().slice(0,7);
+
+  document.getElementById('topbar-actions').innerHTML =
+    `<button class="btn btn-primary" onclick="openSalaryCalcModal()">🧮 Oylik hisoblash</button>`;
+
+  document.getElementById('content').innerHTML = `
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap">
+      <label style="font-weight:600">Guruh:</label>
+      <select id="sal-group-select" style="padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;min-width:200px" onchange="loadSalaryLive()">
+        <option value="">— Guruh tanlang —</option>
+        ${groups.map(g=>`<option value="${g.id}">${g.name} (${g.teacher_name||'—'})</option>`).join('')}
+      </select>
+      <label style="font-weight:600">Oy:</label>
+      <input type="month" id="sal-month" value="${nowMonth}" style="padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px" onchange="loadSalaryLive()">
+      <button class="btn btn-primary" onclick="loadSalaryLive()">🔍 Ko'rish</button>
+    </div>
+    <div id="salary-live-result"></div>
+    <div class="table-card" style="margin-top:20px">
+      <div class="table-header"><div class="table-title">📋 Barcha saqlangan hisobotlar</div></div>
+      <div id="salary-saved-table"><div class="empty"><div class="empty-icon">📭</div><p>Guruh tanlang</p></div></div>
+    </div>`;
+  window._salGroups = groups;
+};
+
+async function loadSalaryLive() {
+  const groupId = document.getElementById('sal-group-select').value;
+  const month   = document.getElementById('sal-month').value;
+  if (!groupId) {
+    document.getElementById('salary-live-result').innerHTML = '';
+    document.getElementById('salary-saved-table').innerHTML = `<div class="empty"><div class="empty-icon">👆</div><p>Guruh tanlang</p></div>`;
+    return;
+  }
+
+  // Jonli hisob
+  document.getElementById('salary-live-result').innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+  const r = await api('GET', `/groups/${groupId}/salary-live?for_month=${month}`);
+  if (!r.ok) {
+    document.getElementById('salary-live-result').innerHTML = `<div style="background:#fef2f2;border:1px solid #fecaca;border-radius:12px;padding:16px;color:#dc2626">${r.data.message}</div>`;
+  } else {
+    const d = r.data.data;
+    document.getElementById('salary-live-result').innerHTML = `
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;box-shadow:var(--shadow)">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px">
+          <div>
+            <div style="font-size:16px;font-weight:700">${d.group_name}</div>
+            <div style="color:var(--text-3);font-size:13px">👨‍🏫 ${d.teacher_name} · ${d.salary_percent}% · ${d.for_month}</div>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <span style="background:#eff6ff;color:#2563eb;padding:4px 10px;border-radius:6px;font-size:13px">
+              ${d.paid_students} / ${d.student_count} o'quvchi to'ladi
+            </span>
+            ${CURRENT_USER.role==='ADMIN'?`<button class="btn btn-primary btn-sm" onclick="calcAndSaveSalary(${d.group_id},'${d.for_month}')">💾 Saqlash</button>`:''}
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
+          <div style="background:#eff6ff;border-radius:10px;padding:16px;text-align:center">
+            <div style="font-size:11px;font-weight:600;color:#1e40af;margin-bottom:6px">JAMI TO'LOV</div>
+            <div style="font-size:20px;font-weight:700;color:#2563eb">${money(d.total_payments)}</div>
+            <div style="font-size:11px;color:var(--text-3);margin-top:2px">${d.for_month} oy uchun</div>
+          </div>
+          <div style="background:#ecfdf5;border-radius:10px;padding:16px;text-align:center">
+            <div style="font-size:11px;font-weight:600;color:#065f46;margin-bottom:6px">O'QITUVCHI OYLIGI</div>
+            <div style="font-size:20px;font-weight:700;color:#059669">${money(d.teacher_salary)}</div>
+            <div style="font-size:11px;color:var(--text-3);margin-top:2px">${d.salary_percent}% dan</div>
+          </div>
+          <div style="background:#fff7ed;border-radius:10px;padding:16px;text-align:center">
+            <div style="font-size:11px;font-weight:600;color:#92400e;margin-bottom:6px">SOF FOYDA</div>
+            <div style="font-size:20px;font-weight:700;color:#d97706">${money(d.net_profit)}</div>
+            <div style="font-size:11px;color:var(--text-3);margin-top:2px">Jami − Oylik</div>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  // Saqlangan hisobotlar
+  const rS = await api('GET', `/groups/${groupId}/salary-report`);
+  if (rS.ok && rS.data.data.records.length) {
+    const records = rS.data.data.records;
+    document.getElementById('salary-saved-table').innerHTML = renderTable(
+      ['Oy','Guruh',"Jami to'lov","O'qituvchi oyligi","Sof foyda","Hisoblangan"],
+      records.map(rec => `<tr>
+        <td><span class="badge badge-blue">${rec.for_month}</span></td>
+        <td>${rec.group_name||'—'}</td>
+        <td style="font-weight:600;color:var(--blue-600)">${money(rec.total_payments)}</td>
+        <td style="font-weight:600;color:var(--success)">${money(rec.teacher_salary)}</td>
+        <td style="font-weight:600;color:#d97706">${money(rec.net_profit)}</td>
+        <td style="color:var(--text-3);font-size:12px">${timeAgo(rec.calculated_at)}</td>
+      </tr>`),
+      "Saqlangan hisob-kitob yo'q"
+    );
+  } else {
+    document.getElementById('salary-saved-table').innerHTML =
+      `<div class="empty"><div class="empty-icon">📭</div><p>Saqlangan hisob-kitob yo'q</p></div>`;
+  }
+}
+
+async function calcAndSaveSalary(groupId, forMonth) {
+  const r = await api('POST', '/teachers/salary-calculate', { group_id: groupId, for_month: forMonth });
+  if (r.ok) { toast('Oylik hisoblandi va saqlandi ✅', 'success'); loadSalaryLive(); }
+  else toast(r.data.message, 'error');
+}
+
+async function openSalaryCalcModal() {
+  const rG = await api('GET', '/groups');
+  const groups = (rG.ok ? rG.data.data : []).filter(g => g.teacher_id);
+  const nowMonth = new Date().toISOString().slice(0,7);
+  const body = `
+    <div class="form-group">
+      <label>Guruh</label>
+      <select id="sc-group">
+        <option value="">— Tanlang —</option>
+        ${groups.map(g=>`<option value="${g.id}">${g.name} — ${g.teacher_name||''} (${g.teacher_salary_percent||'?'}%)</option>`).join('')}
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Oy</label>
+      <input type="month" id="sc-month" value="${nowMonth}">
+    </div>`;
+  const footer = `
+    <button class="btn btn-secondary" onclick="closeModal()">Bekor</button>
+    <button class="btn btn-primary" onclick="submitSalaryCalc()">🧮 Hisoblash va Saqlash</button>`;
+  openModal('🧮 Oylik hisoblash', body, footer);
+}
+
+async function submitSalaryCalc() {
+  const group_id  = parseInt(document.getElementById('sc-group').value);
+  const for_month = document.getElementById('sc-month').value;
+  if (!group_id || !for_month) return toast("Guruh va oy tanlang", 'error');
+  const r = await api('POST', '/teachers/salary-calculate', { group_id, for_month });
+  if (r.ok) {
+    const d = r.data.data;
+    toast('Oylik hisoblandi va saqlandi!', 'success');
+    closeModal();
+    // Switch to salaries page and select this group
+    await showPage('salaries');
+    document.getElementById('sal-group-select').value = group_id;
+    document.getElementById('sal-month').value = for_month;
+    loadSalaryLive();
+  } else toast(r.data.message, 'error');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// GURUH MODALI — teacher_id select qo'shish (override saveGroup)
+// ═══════════════════════════════════════════════════════════════
+const _origOpenGroupModal = openGroupModal;
+openGroupModal = async function(g=null) {
+  const cR = await api('GET', '/courses');
+  const tR = await api('GET', '/teachers');
+  const courses  = cR.ok ? cR.data.data : [];
+  const teachers = tR.ok ? tR.data.data : [];
+  window._coursesCache  = courses;
+  window._teachersCache = teachers;
+  const gid   = g ? g.id : null;
+  const cOpts = courses.map(c =>
+    `<option value="${c.id}" ${g && g.course_id==c.id ? 'selected' : ''}>${c.name} (${c.duration_months||1} oy)${c.start_date?' — '+c.start_date.slice(0,10):''}</option>`
+  ).join('');
+  const tOpts = teachers.map(t =>
+    `<option value="${t.id}" ${g && g.teacher_id==t.id ? 'selected' : ''}>${t.full_name} — ${t.salary_percent}%</option>`
+  ).join('');
+  const title = g ? 'Guruhni tahrirlash' : 'Yangi guruh';
+  const body  = `
+    <div class="form-row">
+      <div class="form-group"><label>Guruh nomi</label><input id="g-name" value="${g ? g.name : ''}"></div>
+      <div class="form-group">
+        <label>O'qituvchi <span style="color:var(--blue-500)">(select)</span></label>
+        <select id="g-teacher-id">
+          <option value="">— O'qituvchi tanlang —</option>
+          ${tOpts}
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Kurs</label>
+        <select id="g-course"><option value="">Tanlang...</option>${cOpts}</select>
+      </div>
+      <div class="form-group">
+        <label>Jadval</label>
+        <select id="g-schedule">
+          <option value="odd"  ${g && g.schedule_type==='odd'  ? 'selected' : ''}>Toq kunlar (Du,Chor,Ju)</option>
+          <option value="even" ${g && g.schedule_type==='even' ? 'selected' : ''}>Juft kunlar (Se,Pa,Sha)</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Dars vaqti</label>
+      <input id="g-time" value="${g ? g.lesson_time : '10:00:00'}" placeholder="10:00:00">
+    </div>
+    <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:10px;font-size:13px;color:#1d4ed8;margin-top:4px">
+      Boshlanish sanasi kurs bo'limida belgilanadi. Tugash sanasi ham kursning davomiyligidan avtomatik hisoblanadi.
+    </div>`;
+  const footer = `
+    <button class="btn btn-secondary" onclick="closeModal()">Bekor</button>
+    <button class="btn btn-primary" onclick="saveGroup(${gid||'null'})">${g ? 'Saqlash' : 'Yaratish'}</button>`;
+  openModal(title, body, footer, true);
+};
+
+const _origSaveGroup = saveGroup;
+saveGroup = async function(id) {
+  const teacherId = parseInt(document.getElementById('g-teacher-id')?.value);
+  const body = {
+    name:          document.getElementById('g-name').value.trim(),
+    course_id:     parseInt(document.getElementById('g-course').value),
+    teacher_id:    teacherId || undefined,
+    schedule_type: document.getElementById('g-schedule').value,
+    lesson_time:   document.getElementById('g-time').value.trim(),
+  };
+  const selCourse = window._coursesCache && window._coursesCache.find(c => c.id === body.course_id);
+  body.start_date = (selCourse && selCourse.start_date) ? selCourse.start_date : new Date().toISOString().slice(0,10);
+  if (!body.name || !body.course_id || !body.teacher_id)
+    return toast("Guruh nomi, kurs va o'qituvchini tanlang", 'error');
+  const r = id ? await api('PATCH', `/groups/${id}`, body) : await api('POST', '/groups', body);
+  if (r.ok) { toast(r.data.message || (id ? 'Yangilandi' : 'Yaratildi'), 'success'); closeModal(); PAGES.groups(); }
+  else toast(r.data.message, 'error');
+};
+
+
+</script>
+</body>
+</html><REPLACE_MARKER>
