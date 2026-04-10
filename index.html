@@ -286,6 +286,7 @@
   .badge-green { background: var(--success-light); color: var(--success); }
   .badge-yellow { background: var(--warning-light); color: #b45309; }
   .badge-red { background: var(--danger-light); color: var(--danger); }
+  .badge-purple { background: #f3e8ff; color: #7c3aed; }
   .badge-gray { background: #f1f5f9; color: #64748b; }
 
   /* ── MODAL ── */
@@ -817,7 +818,7 @@ function attBadge(s) {
   return s ? `<span class="badge ${m[s]||'badge-gray'}">${s}</span>` : '—';
 }
 function payBadge(t) {
-  const m = { cash:'badge-yellow', click:'badge-blue', payme:'badge-green' };
+  const m = { cash:'badge-yellow', click:'badge-blue', payme:'badge-green', karta:'badge-purple' };
   return `<span class="badge ${m[t]||'badge-gray'}">${t}</span>`;
 }
 function roleBadge(r) {
@@ -845,7 +846,7 @@ const PAGES = {};
 
 // ── DASHBOARD ──
 PAGES.dashboard = async () => {
-  const [uR, lR, sR, cR, gR, pR, exR] = await Promise.all([
+  const [uR, lR, sR, cR, gR, pR, exR, psR] = await Promise.all([
     api('GET', '/admin/users'),
     api('GET', '/operator/leads'),
     api('GET', '/operator/students'),
@@ -853,6 +854,7 @@ PAGES.dashboard = async () => {
     api('GET', '/groups'),
     api('GET', '/operator/payments'),
     api('GET', '/expenses/summary'),
+    api('GET', '/manager/payments/summary'),
   ]);
   const users = uR.ok ? uR.data.data : [];
   const leads = lR.ok ? lR.data.data : [];
@@ -863,6 +865,16 @@ PAGES.dashboard = async () => {
   const totalPay = payments.reduce((s, p) => s + parseFloat(p.amount || 0), 0);
   const summary  = exR.ok ? exR.data.data : {};
   const totalExp = summary.total_expense || 0;
+
+  // To'lov turlari bo'yicha breakdown
+  const paySummary  = psR.ok ? psR.data.data : {};
+  const cashTotal   = paySummary.cash   ? (paySummary.cash.total   || 0) : 0;
+  const cashCount   = paySummary.cash   ? (paySummary.cash.count   || 0) : 0;
+  const onlineTotal = paySummary.online ? (paySummary.online.total || 0) : 0;
+  const onlineCount = paySummary.online ? (paySummary.online.count || 0) : 0;
+  const kartaTotal  = paySummary.online?.types?.karta?.total  || 0;
+  const paymeTotal  = paySummary.online?.types?.payme?.total  || 0;
+  const clickTotal  = paySummary.online?.types?.click?.total  || 0;
 
   // O'qituvchilar oyligi: barcha saqlangan TeacherSalary yig'indisi
   // Guruhlar bo'yicha salary-report dan olamiz
@@ -913,6 +925,20 @@ PAGES.dashboard = async () => {
         <div class="stat-icon" style="background:#ecfdf5">💰</div>
         <div class="stat-label">Jami to'lov</div>
         <div class="stat-value" style="font-size:16px">${money(totalPay)}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#fffbeb">💵</div>
+        <div class="stat-label">Naqd (Cash)</div>
+        <div class="stat-value" style="font-size:16px;color:#d97706">${money(cashTotal)}</div>
+        <div style="font-size:11px;color:var(--text-3);margin-top:4px">${cashCount} ta to'lov</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#eff6ff">💳</div>
+        <div class="stat-label">Online (Karta/Payme/Click)</div>
+        <div class="stat-value" style="font-size:16px;color:#2563eb">${money(onlineTotal)}</div>
+        <div style="font-size:11px;color:var(--text-3);margin-top:4px">
+          Karta: ${money(kartaTotal)} &nbsp;·&nbsp; Payme: ${money(paymeTotal)} &nbsp;·&nbsp; Click: ${money(clickTotal)}
+        </div>
       </div>
       <div class="stat-card">
         <div class="stat-icon" style="background:#fef2f2">💸</div>
@@ -1391,6 +1417,7 @@ async function openPaymentModal() {
         <label>To'lov turi</label>
         <select id="p-type">
           <option value="cash">Cash</option>
+          <option value="karta">Karta</option>
           <option value="click">Click</option>
           <option value="payme">Payme</option>
         </select>
