@@ -581,14 +581,13 @@
           <div class="nav-item admin-manager" onclick="showPage('expenses')">
             <span class="icon">💸</span> Harajatlar
           </div>
-          <br> <br>
+          <br> 
         </div>
         <div class="nav-section admin-manager">
           <div class="nav-label">Xodimlar</div>
           <div class="nav-item admin-manager" onclick="showPage('teachers')">
             <span class="icon">&#x1F468;&#x200D;&#x1F3EB;</span> O'qituvchilar
           </div>
-          <br><br>
           <div class="nav-item admin-manager" onclick="showPage('salaries')">
             <span class="icon">&#x1F4B0;</span> Oyliklar
           </div>
@@ -1480,13 +1479,12 @@ PAGES.courses = async () => {
       <div class="table-header">
         <div class="table-title">Kurslar (${courses.length})</div>
       </div>
-      ${renderTable(['ID','Kurs nomi','Oylik narx','Davomiylik','Boshlanish sanasi','Jami narx','Amallar'],
+      ${renderTable(['ID','Kurs nomi','Oylik narx','Davomiylik','Jami narx','Amallar'],
         courses.map(c => `<tr>
           <td class="font-mono text-muted">#${c.id}</td>
           <td><b>${c.name}</b></td>
           <td class="font-mono">${money(c.price)}/oy</td>
           <td><span class="badge badge-blue">${c.duration_months||1} oy</span></td>
-          <td>${c.start_date ? dateStr(c.start_date) : '<span style="color:var(--text-3)">—</span>'}</td>
           <td class="font-mono"><b style="color:#059669">${money(c.total_price||c.price)}</b></td>
           <td><div class="td-actions">
             ${CURRENT_USER.role==='ADMIN' ? `
@@ -1513,10 +1511,6 @@ function openCourseModal(c=null) {
         <input id="c-dur" type="number" value="${c ? c.duration_months : 1}" min="1" placeholder="3">
       </div>
     </div>
-    <div class="form-group">
-      <label>Boshlanish sanasi</label>
-      <input type="date" id="c-start" value="${c && c.start_date ? c.start_date.slice(0,10) : ''}">
-    </div>
     <div style="background:#ecfdf5;border:1px solid #a7f3d0;border-radius:8px;padding:10px;font-size:13px;color:#065f46;margin-top:4px">
       Jami narx = Oylik narx × Davomiylik. O'quvchi yozilganda avtomatik qarz hisoblanadi.
     </div>`;
@@ -1528,14 +1522,12 @@ function openCourseModal(c=null) {
 
 
 async function saveCourse(id) {
-  const startVal = document.getElementById('c-start').value;
   const durVal   = parseInt(document.getElementById('c-dur').value) || 1;
   const body = {
     name: document.getElementById('c-name').value.trim(),
     price: parseFloat(document.getElementById('c-price').value),
     duration_months: durVal,
   };
-  if (startVal) body.start_date = startVal;
   if (!body.name || isNaN(body.price)) return toast('Nom va narx majburiy', 'error');
   const r = id ? await api('PATCH', `/courses/${id}`, body) : await api('POST', '/courses', body);
   if (r.ok) { toast(id ? 'Yangilandi' : 'Yaratildi', 'success'); closeModal(); PAGES.courses(); }
@@ -1593,9 +1585,9 @@ function renderGroupTable(list) {
 async function openGroupModal(g=null) {
   const cR = await api('GET', '/courses');
   const courses = cR.ok ? cR.data.data : [];
-  window._coursesCache = courses; // start_date uchun saqlash
+  window._coursesCache = courses;
   const gid = g ? g.id : null;
-  const cOpts = courses.map(c => `<option value="${c.id}" ${g && g.course_id==c.id ? 'selected' : ''}>${c.name} (${c.duration_months||1} oy)${c.start_date ? ' — ' + c.start_date.slice(0,10) : ''}</option>`).join('');
+  const cOpts = courses.map(c => `<option value="${c.id}" ${g && g.course_id==c.id ? 'selected' : ''}>${c.name} (${c.duration_months||1} oy)</option>`).join('');
   const title = g ? 'Guruhni tahrirlash' : 'Yangi guruh';
   const body = `
     <div class="form-row">
@@ -1615,12 +1607,18 @@ async function openGroupModal(g=null) {
         </select>
       </div>
     </div>
-    <div class="form-group">
-      <label>Dars vaqti</label>
-      <input id="g-time" value="${g ? g.lesson_time : '10:00:00'}" placeholder="10:00:00">
+    <div class="form-row">
+      <div class="form-group">
+        <label>Boshlanish sanasi</label>
+        <input type="date" id="g-start" value="${g && g.start_date ? g.start_date.slice(0,10) : ''}">
+      </div>
+      <div class="form-group">
+        <label>Dars vaqti</label>
+        <input id="g-time" value="${g ? g.lesson_time : '10:00:00'}" placeholder="10:00:00">
+      </div>
     </div>
     <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:10px;font-size:13px;color:#1d4ed8;margin-top:4px">
-      Boshlanish sanasi kurs bo'limida belgilanadi. Tugash sanasi ham kursning davomiyligidan avtomatik hisoblanadi. Darslar ham avtomatik yaratiladi.
+      Boshlanish sanasi guruhda belgilanadi. Tugash sanasi kursning davomiyligidan avtomatik hisoblanadi. Darslar ham avtomatik yaratiladi.
     </div>`;
   const footer = `
     <button class="btn btn-secondary" onclick="closeModal()">Bekor</button>
@@ -1637,10 +1635,8 @@ async function saveGroup(id) {
     schedule_type: document.getElementById('g-schedule').value,
     lesson_time: document.getElementById('g-time').value.trim(),
   };
-  // start_date kurs boshlanish sanasidan avtomatik olinadi
-  const selCourse = window._coursesCache && window._coursesCache.find(c => c.id === body.course_id);
-  if (selCourse && selCourse.start_date) body.start_date = selCourse.start_date;
-  else body.start_date = new Date().toISOString().slice(0,10); // fallback bugungi sana
+  const startVal = document.getElementById('g-start').value;
+  if (startVal) body.start_date = startVal;
   if (!body.name || !body.teacher_name || !body.course_id) return toast("Barcha maydonlarni to'ldiring", 'error');
   const r = id ? await api('PATCH', `/groups/${id}`, body) : await api('POST', '/groups', body);
   if (r.ok) { toast(r.data.message || (id ? 'Yangilandi' : 'Yaratildi'), 'success'); closeModal(); PAGES.groups(); }
@@ -2617,7 +2613,7 @@ openGroupModal = async function(g=null) {
   window._teachersCache = teachers;
   const gid   = g ? g.id : null;
   const cOpts = courses.map(c =>
-    `<option value="${c.id}" ${g && g.course_id==c.id ? 'selected' : ''}>${c.name} (${c.duration_months||1} oy)${c.start_date?' — '+c.start_date.slice(0,10):''}</option>`
+    `<option value="${c.id}" ${g && g.course_id==c.id ? 'selected' : ''}>${c.name} (${c.duration_months||1} oy)</option>`
   ).join('');
   const tOpts = teachers.map(t =>
     `<option value="${t.id}" ${g && g.teacher_id==t.id ? 'selected' : ''}>${t.full_name} — ${t.salary_percent}%</option>`
@@ -2647,12 +2643,18 @@ openGroupModal = async function(g=null) {
         </select>
       </div>
     </div>
-    <div class="form-group">
-      <label>Dars vaqti</label>
-      <input id="g-time" value="${g ? g.lesson_time : '10:00:00'}" placeholder="10:00:00">
+    <div class="form-row">
+      <div class="form-group">
+        <label>Boshlanish sanasi</label>
+        <input type="date" id="g-start" value="${g && g.start_date ? g.start_date.slice(0,10) : ''}">
+      </div>
+      <div class="form-group">
+        <label>Dars vaqti</label>
+        <input id="g-time" value="${g ? g.lesson_time : '10:00:00'}" placeholder="10:00:00">
+      </div>
     </div>
     <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:10px;font-size:13px;color:#1d4ed8;margin-top:4px">
-      Boshlanish sanasi kurs bo'limida belgilanadi. Tugash sanasi ham kursning davomiyligidan avtomatik hisoblanadi.
+      Boshlanish sanasi guruhda belgilanadi. Tugash sanasi kursning davomiyligidan avtomatik hisoblanadi.
     </div>`;
   const footer = `
     <button class="btn btn-secondary" onclick="closeModal()">Bekor</button>
@@ -2670,8 +2672,8 @@ saveGroup = async function(id) {
     schedule_type: document.getElementById('g-schedule').value,
     lesson_time:   document.getElementById('g-time').value.trim(),
   };
-  const selCourse = window._coursesCache && window._coursesCache.find(c => c.id === body.course_id);
-  body.start_date = (selCourse && selCourse.start_date) ? selCourse.start_date : new Date().toISOString().slice(0,10);
+  const startVal = document.getElementById('g-start')?.value;
+  if (startVal) body.start_date = startVal;
   if (!body.name || !body.course_id || !body.teacher_id)
     return toast("Guruh nomi, kurs va o'qituvchini tanlang", 'error');
   const r = id ? await api('PATCH', `/groups/${id}`, body) : await api('POST', '/groups', body);
