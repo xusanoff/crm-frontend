@@ -803,8 +803,8 @@ function timeAgo(d) {
   return dateStr(d);
 }
 function leadBadge(s) {
-  const m = { new:'badge-blue', contacted:'badge-yellow', interested:'badge-green', rejected:'badge-red', converted:'badge-green' };
-  const l = { new:'Yangi', contacted:"Bog'landi", interested:'Qiziqdi', rejected:'Rad', converted:'Aylandi' };
+  const m = { yangi:'badge-blue', boglandi:'badge-yellow', qiziqdi:'badge-green', rad:'badge-red', talabaga_aylandi:'badge-green' };
+  const l = { yangi:'Yangi', boglandi:"Bog'landi", qiziqdi:'Qiziqdi', rad:'Rad', talabaga_aylandi:'Talabaga aylandi' };
   return `<span class="badge ${m[s]||'badge-gray'}">${l[s]||s}</span>`;
 }
 function enrBadge(s) {
@@ -891,7 +891,7 @@ PAGES.dashboard = async () => {
 
   // Sof foyda = jami to'lov - o'qituvchi oyliklari - harajatlar
   const netProfit = totalPay - totalTeacherSalary - totalExp;
-  const activeLead = leads.filter(l => l.status === 'new' || l.status === 'contacted').length;
+  const activeLead = leads.filter(l => l.status === 'yangi' || l.status === 'boglandi').length;
 
   document.getElementById('content').innerHTML = `
     <div class="stats-grid">
@@ -1083,60 +1083,155 @@ async function deleteUser(id, name) {
 // ── LEADS ──
 PAGES.leads = async () => {
   document.getElementById('topbar-actions').innerHTML = `<button class="btn btn-primary" onclick="openLeadModal()">＋ Yangi lid</button>`;
-  const r = await api('GET', '/operator/leads');
+  const [r, cR] = await Promise.all([
+    api('GET', '/operator/leads'),
+    api('GET', '/courses'),
+  ]);
   if (!r.ok) return toast(r.data.message, 'error');
   let leads = r.data.data;
+  window._coursesCache = cR.ok ? cR.data.data : [];
 
-  const render = (list) => {
-    document.getElementById('content').innerHTML = `
-      <div class="tab-bar" id="lead-tabs">
-        <button class="tab-btn active" onclick="filterLeadTab('all',this)">Hammasi (${leads.length})</button>
-        <button class="tab-btn" onclick="filterLeadTab('new',this)">Yangi</button>
-        <button class="tab-btn" onclick="filterLeadTab('contacted',this)">Bog'landi</button>
-        <button class="tab-btn" onclick="filterLeadTab('interested',this)">Qiziqdi</button>
-        <button class="tab-btn" onclick="filterLeadTab('rejected',this)">Rad</button>
-        <button class="tab-btn" onclick="filterLeadTab('converted',this)">Aylandi</button>
-      </div>
-      <div class="table-card">
-        <div class="table-header">
-          <div class="table-title">Lidlar (${list.length})</div>
-          <div class="search-box"><input type="text" placeholder="Qidirish..." oninput="window._filterLead(this.value)"></div>
+  const statusColors = {yangi:'#3b82f6',boglandi:'#f59e0b',qiziqdi:'#8b5cf6',rad:'#ef4444',talabaga_aylandi:'#10b981'};
+  const statusLabels = {yangi:'Yangi',boglandi:"Bog'landi",qiziqdi:'Qiziqdi',rad:'Rad',talabaga_aylandi:'Talabaga aylandi'};
+
+  // ── Vaqt bo'yicha filter (client-side, tezkor) ──
+  const filterByPeriod = (list, period) => {
+    const now = new Date();
+    const start = new Date();
+    if (period === 'day')   { start.setHours(0,0,0,0); }
+    else if (period === 'week') { start.setDate(now.getDate() - now.getDay() + (now.getDay()===0?-6:1)); start.setHours(0,0,0,0); }
+    else if (period === 'month') { start.setDate(1); start.setHours(0,0,0,0); }
+    else return list;
+    return list.filter(l => new Date(l.created_at) >= start);
+  };
+
+  // ── Mini statistika paneli ──
+  const renderStatBar = (list) => {
+    const total = list.length;
+    const byStatus = {};
+    const byCourse = {};
+    list.forEach(l => {
+      byStatus[l.status] = (byStatus[l.status]||0)+1;
+      const cn = l.course_name||'Belgilanmagan';
+      byCourse[cn] = (byCourse[cn]||0)+1;
+    });
+    const statusPills = Object.entries(byStatus).map(([k,v]) =>
+      `<div style="display:flex;align-items:center;gap:6px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:6px 12px">
+        <span style="width:8px;height:8px;border-radius:50%;background:${statusColors[k]||'#94a3b8'};display:inline-block"></span>
+        <span style="font-size:13px;color:#475569">${statusLabels[k]||k}</span>
+        <span style="font-weight:700;font-size:15px;color:#1e293b">${v}</span>
+      </div>`
+    ).join('');
+    const coursePills = Object.entries(byCourse).sort((a,b)=>b[1]-a[1]).slice(0,5).map(([k,v]) =>
+      `<div style="display:flex;align-items:center;gap:6px;background:#f0f9ff;border:1px solid #bae6fd;border-radius:8px;padding:6px 12px">
+        <span style="font-size:13px;color:#0369a1">📚 ${k}</span>
+        <span style="font-weight:700;font-size:15px;color:#1e293b">${v}</span>
+      </div>`
+    ).join('');
+    return `
+      <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:16px 20px;margin-bottom:16px">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+          <div style="display:flex;align-items:center;gap:8px">
+            <span style="font-size:24px;font-weight:800;color:#1e293b">${total}</span>
+            <span style="font-size:14px;color:#64748b">ta lid</span>
+          </div>
+          <div style="display:flex;flex-wrap:wrap;gap:8px">${statusPills}</div>
         </div>
-        ${renderTable(['ID','Ism','Telefon','Manba','Holat','Izoh','Vaqt','Amallar'],
-          list.map(l => `<tr>
-            <td class="font-mono text-muted">#${l.id}</td>
-            <td><b>${l.full_name}</b></td>
-            <td class="font-mono">${l.phone_number||'—'}</td>
-            <td>${l.source||'—'}</td>
-            <td>${leadBadge(l.status)}</td>
-            <td class="text-muted">${l.comment||'—'}</td>
-            <td class="text-muted text-sm">${timeAgo(l.created_at)}</td>
-            <td><div class="td-actions">
-              <button class="btn btn-secondary btn-sm" onclick='openLeadModal(${JSON.stringify(l)})'>✏️</button>
-              <button class="btn btn-danger btn-sm" onclick="deleteLead(${l.id})">🗑</button>
-            </div></td>
-          </tr>`), 'Lid topilmadi')}
+        ${Object.keys(byCourse).length ? `<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;padding-top:12px;border-top:1px solid #f1f5f9">${coursePills}</div>` : ''}
       </div>`;
   };
+
+  // ── Asosiy render ──
+  const render = (list, period) => {
+    const periodFiltered = filterByPeriod(list, period || window._leadPeriod || 'all');
+    const statBar = renderStatBar(periodFiltered);
+    const rows = periodFiltered.map(l => `<tr>
+      <td class="font-mono text-muted">#${l.id}</td>
+      <td><b>${l.full_name}</b></td>
+      <td class="font-mono">${l.phone_number||'—'}</td>
+      <td>${l.source||'—'}</td>
+      <td>${l.course_name ? `<span style="background:#eff6ff;color:#3b82f6;padding:2px 8px;border-radius:12px;font-size:12px;font-weight:600">${l.course_name}</span>` : '<span class="text-muted">—</span>'}</td>
+      <td>${leadBadge(l.status)}</td>
+      <td class="text-muted">${l.comment||'—'}</td>
+      <td class="text-muted text-sm">${timeAgo(l.created_at)}</td>
+      <td><div class="td-actions">
+        <button class="btn btn-secondary btn-sm" onclick='openLeadModal(${JSON.stringify(l)})'>✏️</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteLead(${l.id})">🗑</button>
+      </div></td>
+    </tr>`).join('');
+
+    const tableHtml = periodFiltered.length === 0
+      ? `<div class="empty"><div class="empty-icon">📭</div><p>Lid topilmadi</p></div>`
+      : `<table><thead><tr>${['ID','Ism','Telefon','Manba','Kurs','Holat','Izoh','Vaqt','Amallar'].map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${rows}</tbody></table>`;
+    document.getElementById('lead-body').innerHTML = statBar + tableHtml;
+    // search input saqlansin
+    const sq = document.getElementById('lead-search');
+    if (sq) sq.oninput = () => window._filterLead(sq.value);
+  };
+
+  document.getElementById('content').innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:12px">
+      <div class="tab-bar" id="lead-tabs" style="margin-bottom:0">
+        <button class="tab-btn active" onclick="filterLeadTab('all',this)">Hammasi (${leads.length})</button>
+        <button class="tab-btn" onclick="filterLeadTab('yangi',this)">Yangi</button>
+        <button class="tab-btn" onclick="filterLeadTab('boglandi',this)">Bog'landi</button>
+        <button class="tab-btn" onclick="filterLeadTab('qiziqdi',this)">Qiziqdi</button>
+        <button class="tab-btn" onclick="filterLeadTab('rad',this)">Rad</button>
+        <button class="tab-btn" onclick="filterLeadTab('talabaga_aylandi',this)">Talabaga aylandi</button>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="font-size:13px;color:#64748b;font-weight:500">📅 Vaqt:</span>
+        <div style="display:flex;gap:4px" id="period-btns">
+          <button class="btn btn-secondary btn-sm" id="pb-all"   onclick="setLeadPeriod('all',this)"   style="background:#6366f1;color:#fff;border-color:#6366f1">Hammasi</button>
+          <button class="btn btn-secondary btn-sm" id="pb-day"   onclick="setLeadPeriod('day',this)"  >Bugun</button>
+          <button class="btn btn-secondary btn-sm" id="pb-week"  onclick="setLeadPeriod('week',this)" >Hafta</button>
+          <button class="btn btn-secondary btn-sm" id="pb-month" onclick="setLeadPeriod('month',this)">Oy</button>
+        </div>
+        <div class="search-box" style="margin:0"><input id="lead-search" type="text" placeholder="Qidirish..." oninput="window._filterLead(this.value)"></div>
+      </div>
+    </div>
+    <div id="lead-body"></div>`;
+
   window._allLeads = leads;
   window._leadTab = 'all';
+  window._leadPeriod = 'all';
+
   window._filterLead = (q) => {
-    let filtered = window._leadTab === 'all' ? leads : leads.filter(l => l.status === window._leadTab);
-    render(searchFilter(filtered, q, ['full_name','phone_number','source']));
+    let list = window._leadTab === 'all' ? leads : leads.filter(l => l.status === window._leadTab);
+    render(searchFilter(list, q, ['full_name','phone_number','source','course_name']));
   };
+
   window.filterLeadTab = (tab, btn) => {
     document.querySelectorAll('#lead-tabs .tab-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     window._leadTab = tab;
-    render(tab === 'all' ? leads : leads.filter(l => l.status === tab));
+    const q = document.getElementById('lead-search')?.value || '';
+    let list = tab === 'all' ? leads : leads.filter(l => l.status === tab);
+    render(searchFilter(list, q, ['full_name','phone_number','source','course_name']));
   };
-  render(leads);
+
+  window.setLeadPeriod = (period, btn) => {
+    document.querySelectorAll('#period-btns button').forEach(b => {
+      b.style.background=''; b.style.color=''; b.style.borderColor='';
+    });
+    btn.style.background='#6366f1'; btn.style.color='#fff'; btn.style.borderColor='#6366f1';
+    window._leadPeriod = period;
+    const q = document.getElementById('lead-search')?.value || '';
+    let list = window._leadTab === 'all' ? leads : leads.filter(l => l.status === window._leadTab);
+    render(searchFilter(list, q, ['full_name','phone_number','source','course_name']), period);
+  };
+
+  render(leads, 'all');
 };
 
 function openLeadModal(l=null) {
   const lid = l ? l.id : null;
   const title = l ? 'Lidni tahrirlash' : 'Yangi lid';
-  const statuses = ['new','contacted','interested','rejected','converted'];
+  const statuses = ['yangi','boglandi','qiziqdi','rad','talabaga_aylandi'];
+  const courses = window._coursesCache || [];
+  const courseOpts = `<option value="">Tanlang...</option>` + courses.map(c =>
+    `<option value="${c.id}" ${l && l.course_id==c.id ? 'selected' : ''}>${c.name}</option>`
+  ).join('');
   const body = `
     <div class="form-row">
       <div class="form-group"><label>Ism</label><input id="l-name" value="${l ? l.full_name : ''}"></div>
@@ -1147,9 +1242,13 @@ function openLeadModal(l=null) {
       <div class="form-group">
         <label>Holat</label>
         <select id="l-status">
-          ${statuses.map(s => `<option value="${s}" ${l && l.status===s ? 'selected' : ''}>${s}</option>`).join('')}
+          ${statuses.map(s => `<option value="${s}" ${l && l.status===s ? 'selected' : ''}>${{yangi:'Yangi',boglandi:"Bog'landi",qiziqdi:'Qiziqdi',rad:'Rad',talabaga_aylandi:'Talabaga aylandi'}[s]||s}</option>`).join('')}
         </select>
       </div>
+    </div>
+    <div class="form-group">
+      <label>Qiziqayotgan kurs</label>
+      <select id="l-course">${courseOpts}</select>
     </div>
     <div class="form-group"><label>Izoh</label><textarea id="l-comment">${l ? (l.comment||'') : ''}</textarea></div>`;
   const footer = `
@@ -1160,12 +1259,14 @@ function openLeadModal(l=null) {
 
 
 async function saveLead(id) {
+  const courseVal = document.getElementById('l-course').value;
   const body = {
     full_name: document.getElementById('l-name').value.trim(),
     phone_number: document.getElementById('l-phone').value.trim(),
     source: document.getElementById('l-source').value.trim(),
     status: document.getElementById('l-status').value,
     comment: document.getElementById('l-comment').value.trim(),
+    course_id: courseVal ? parseInt(courseVal) : null,
   };
   if (!body.full_name || !body.phone_number) return toast('Ism va telefon majburiy', 'error');
   const r = id ? await api('PATCH', `/operator/leads/${id}`, body) : await api('POST', '/operator/leads', body);
