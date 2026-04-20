@@ -845,7 +845,7 @@ const PAGES = {};
 
 // ── DASHBOARD ──
 PAGES.dashboard = async () => {
-  const [uR, lR, sR, cR, gR, pR, exR, psR] = await Promise.all([
+  const [uR, lR, sR, cR, gR, pR, exR, psR, msR] = await Promise.all([
     api('GET', '/admin/users'),
     api('GET', '/operator/leads'),
     api('GET', '/operator/students'),
@@ -854,6 +854,7 @@ PAGES.dashboard = async () => {
     api('GET', '/operator/payments'),
     api('GET', '/expenses/summary'),
     api('GET', '/manager/payments/summary'),
+    api('GET', '/manager/dashboard/monthly-stats'),
   ]);
   const users = uR.ok ? uR.data.data : [];
   const leads = lR.ok ? lR.data.data : [];
@@ -875,6 +876,18 @@ PAGES.dashboard = async () => {
   const paymeTotal  = paySummary.online?.types?.payme?.total  || 0;
   const clickTotal  = paySummary.online?.types?.click?.total  || 0;
 
+  // Oylik statistika
+  const ms        = msR.ok ? msR.data.data : null;
+  const curMonth  = ms?.current_month || '';
+  const prevMonth = ms?.prev_month    || '';
+  const curExp    = ms?.current?.expected     || 0;
+  const curPaid   = ms?.current?.paid         || 0;
+  const curRem    = ms?.current?.remaining    || 0;
+  const curUnpCnt = ms?.current?.unpaid_count || 0;
+  const curPaidCnt= ms?.current?.paid_count   || 0;
+  const prevRem   = ms?.previous?.remaining   || 0;
+  const prevUnpaid= ms?.previous?.unpaid_students || [];
+
   // O'qituvchilar oyligi: barcha saqlangan TeacherSalary yig'indisi
   // Guruhlar bo'yicha salary-report dan olamiz
   let totalTeacherSalary = 0;
@@ -892,6 +905,26 @@ PAGES.dashboard = async () => {
   // Sof foyda = jami to'lov - o'qituvchi oyliklari - harajatlar
   const netProfit = totalPay - totalTeacherSalary - totalExp;
   const activeLead = leads.filter(l => l.status === 'yangi' || l.status === 'boglandi').length;
+
+  // Oldingi oy to'lamaganlar jadvali
+  const prevUnpaidRows = prevUnpaid.slice(0,5).map(s => `<tr>
+    <td><b>${s.student_name}</b></td>
+    <td class="font-mono">${money(s.amount)}</td>
+    <td class="font-mono" style="color:#059669">${money(s.paid_amount)}</td>
+    <td class="font-mono" style="color:#dc2626"><b>${money(s.remaining)}</b></td>
+  </tr>`).join('');
+
+  // Joriy oy o'quvchilar holati
+  const curStudents = (ms?.current?.students || []);
+  const curStudentRows = curStudents.slice(0,8).map(s => `<tr>
+    <td><b>${s.student_name}</b></td>
+    <td><span style="background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe;border-radius:20px;padding:2px 8px;font-size:11px">${s.month_number}-oy</span></td>
+    <td class="font-mono">${money(s.amount)}</td>
+    <td>${s.is_paid
+      ? `<span style="color:#059669;font-weight:600">✅ To'langan</span>`
+      : `<span style="color:#d97706;font-weight:600">⏳ ${money(s.remaining)} qoldi</span>`
+    }</td>
+  </tr>`).join('');
 
   document.getElementById('content').innerHTML = `
     <div class="stats-grid">
@@ -959,6 +992,78 @@ PAGES.dashboard = async () => {
       </div>
     </div>
 
+    ${ms ? `
+    <!-- ═══ OYLIK QARZ STATISTIKASI ═══ -->
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:20px">
+
+      <div class="stat-card" style="border:2px solid #bfdbfe;background:linear-gradient(135deg,#eff6ff,#dbeafe)">
+        <div class="stat-icon" style="background:#dbeafe">📅</div>
+        <div class="stat-label" style="color:#1d4ed8;font-weight:600">${curMonth} — Kutilayotgan</div>
+        <div class="stat-value" style="font-size:18px;color:#1d4ed8">${money(curExp)}</div>
+        <div style="font-size:11px;color:#3b82f6;margin-top:4px">${curPaidCnt + curUnpCnt} ta o'quvchi</div>
+      </div>
+
+      <div class="stat-card" style="border:2px solid #a7f3d0;background:linear-gradient(135deg,#ecfdf5,#d1fae5)">
+        <div class="stat-icon" style="background:#d1fae5">✅</div>
+        <div class="stat-label" style="color:#059669;font-weight:600">${curMonth} — To'langan</div>
+        <div class="stat-value" style="font-size:18px;color:#059669">${money(curPaid)}</div>
+        <div style="font-size:11px;color:#10b981;margin-top:4px">${curPaidCnt} ta o'quvchi to'lagan</div>
+      </div>
+
+      <div class="stat-card" style="border:2px solid ${curRem>0?'#fde68a':'#a7f3d0'};background:linear-gradient(135deg,${curRem>0?'#fffbeb,#fef3c7':'#ecfdf5,#d1fae5'})">
+        <div class="stat-icon" style="background:${curRem>0?'#fef3c7':'#d1fae5'}">${curRem>0?'⏳':'🎉'}</div>
+        <div class="stat-label" style="color:${curRem>0?'#d97706':'#059669'};font-weight:600">${curMonth} — Qolgan qarz</div>
+        <div class="stat-value" style="font-size:18px;color:${curRem>0?'#d97706':'#059669'}">${money(curRem)}</div>
+        <div style="font-size:11px;color:${curRem>0?'#f59e0b':'#10b981'};margin-top:4px">${curUnpCnt} ta o'quvchi to'lamagan</div>
+      </div>
+
+      ${prevRem > 0 ? `
+      <div class="stat-card" style="border:2px solid #fecaca;background:linear-gradient(135deg,#fef2f2,#fee2e2);grid-column:span 3">
+        <div style="display:flex;align-items:center;gap:10px">
+          <div class="stat-icon" style="background:#fee2e2">🔴</div>
+          <div>
+            <div class="stat-label" style="color:#dc2626;font-weight:600">O'tgan oy (${prevMonth}) qolgan qarzi</div>
+            <div class="stat-value" style="font-size:22px;color:#dc2626">${money(prevRem)}</div>
+          </div>
+          <div style="margin-left:auto;font-size:12px;color:#ef4444">${prevUnpaid.length} ta o'quvchi to'lamagan</div>
+        </div>
+      </div>` : ''}
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+      <div class="table-card">
+        <div class="table-header">
+          <div class="table-title">📅 ${curMonth} — O'quvchilar holati</div>
+        </div>
+        ${curStudents.length ? `
+        <table><thead><tr><th>O'quvchi</th><th>Oy</th><th>Summa</th><th>Holat</th></tr></thead>
+        <tbody>${curStudentRows}</tbody></table>
+        ${curStudents.length > 8 ? `<div style="text-align:center;padding:8px;font-size:12px;color:var(--text-3)">+${curStudents.length-8} ta boshqa</div>` : ''}
+        ` : '<div class="empty"><p>Joriy oyda ma\'lumot yo\'q</p></div>'}
+      </div>
+
+      ${prevUnpaid.length > 0 ? `
+      <div class="table-card">
+        <div class="table-header">
+          <div class="table-title" style="color:#dc2626">🔴 ${prevMonth} — To'lamagan o'quvchilar</div>
+        </div>
+        <table><thead><tr><th>O'quvchi</th><th>Jami</th><th>To'lagan</th><th>Qoldi</th></tr></thead>
+        <tbody>${prevUnpaidRows}</tbody></table>
+        ${prevUnpaid.length > 5 ? `<div style="text-align:center;padding:8px;font-size:12px;color:#dc2626">+${prevUnpaid.length-5} ta boshqa</div>` : ''}
+      </div>` : `
+      <div class="table-card">
+        <div class="table-header">
+          <div class="table-title">🎯 So'ngi lidlar</div>
+        </div>
+        ${renderTable(['Ism','Telefon','Holat'],
+          leads.slice(0,5).map(l => `<tr>
+            <td>${l.full_name}</td>
+            <td class="font-mono">${l.phone_number||'—'}</td>
+            <td>${leadBadge(l.status)}</td>
+          </tr>`), "Lid yo'q")}
+      </div>`}
+    </div>
+    ` : `
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
       <div class="table-card">
         <div class="table-header">
@@ -983,7 +1088,7 @@ PAGES.dashboard = async () => {
             <td>${p.for_month||'—'}</td>
           </tr>`), "To'lov yo'q")}
       </div>
-    </div>
+    </div>`}
   `;
 };
 
@@ -1368,7 +1473,7 @@ async function deleteStudent(id) {
 PAGES.enrollments = async () => {
   const canEdit = ['ADMIN','OPERATOR'].includes(CURRENT_USER.role);
   if (canEdit) document.getElementById('topbar-actions').innerHTML = `<button class="btn btn-primary" onclick="openEnrollmentModal()">＋ Guruhga qo'shish</button>`;
-  const r = await api('GET', '/operator/enrollments');
+  const r = await api('GET', '/manager/enrollments/with-month');
   if (!r.ok) return toast(r.data.message, 'error');
   const enrollments = r.data.data;
 
@@ -1377,18 +1482,24 @@ PAGES.enrollments = async () => {
       <div class="table-header">
         <div class="table-title">Ro'yxatga olinganlar (${enrollments.length})</div>
       </div>
-      ${renderTable(['ID',"O'quvchi ID",'Guruh ID','Holat','Yaratilgan','Amallar'],
-        enrollments.map(e => `<tr>
+      ${renderTable(['ID',"O'quvchi",'Guruh / Kurs','Nechanchi oy','Oylik to\'lov','Holat','Amallar'],
+        enrollments.map(e => {
+          const monthNum  = e.current_month_number || 1;
+          const totalMths = e.duration_months || '?';
+          const monthBadge = `<span style="background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe;border-radius:20px;padding:3px 10px;font-size:12px;font-weight:600">${monthNum}-oy / ${totalMths} oy</span>`;
+          return `<tr>
           <td class="font-mono text-muted">#${e.id}</td>
-          <td>#${e.student_id}</td>
-          <td>#${e.group_id}</td>
+          <td><b>${e.student_name||'—'}</b></td>
+          <td>${e.group_name||'—'} <span class="text-muted text-sm">· ${e.course_name||'—'}</span></td>
+          <td>${monthBadge}</td>
+          <td class="font-mono">${money(e.monthly_payment||0)}</td>
           <td>${enrBadge(e.status)}</td>
-          <td class="text-muted">${dateStr(e.created_at)}</td>
           <td><div class="td-actions">
-            <button class="btn btn-secondary btn-sm" onclick="changeEnrollStatus(${e.id},'${e.status}')">Holat</button>
+            ${canEdit ? `<button class="btn btn-secondary btn-sm" onclick="changeEnrollStatus(${e.id},'${e.status}')">Holat</button>` : ''}
             ${CURRENT_USER.role==='ADMIN' ? `<button class="btn btn-danger btn-sm" onclick="deleteEnroll(${e.id})">🗑</button>` : ''}
           </div></td>
-        </tr>`), "Ro'yxat bo'sh")}
+        </tr>`;
+        }), "Ro'yxat bo'sh")}
     </div>`;
 };
 
